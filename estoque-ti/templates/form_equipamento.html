@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }} - Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }}</h1>
+</div>
+
+<form method="post" class="form-card" id="form-equipamento">
+    <div class="campo">
+        <label for="nome">Nome/Tipo do equipamento</label>
+        <input type="text" id="nome" name="nome" required
+               value="{{ valores.nome }}"
+               placeholder="Ex.: Notebook Dell Latitude 5420">
+    </div>
+
+    <div class="campo">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
+            <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
+            {% for c in categorias %}
+                <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" id="categoria_customizada" name="categoria_customizada"
+               placeholder="Digite a nova categoria"
+               value="{{ valores.categoria_customizada }}"
+               style="display:none; margin-top:8px;">
+    </div>
+
+    <div class="campo">
+        <label for="quantidade">Quantidade</label>
+        <input type="number" id="quantidade" name="quantidade" min="1" step="1" required
+               value="{{ valores.quantidade }}">
+    </div>
+
+    <div class="campo">
+        <label for="tecnico_responsavel">Técnico responsável</label>
+        <input type="text" id="tecnico_responsavel" name="tecnico_responsavel" list="lista-tecnicos" required
+               value="{{ valores.tecnico_responsavel }}"
+               placeholder="Seu nome">
+        <datalist id="lista-tecnicos">
+            {% for t in tecnicos_existentes %}
+                <option value="{{ t }}">
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <div class="campo">
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+            {% for s in status_opcoes %}
+                <option value="{{ s }}" {{ 'selected' if s == valores.status else '' }}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-acoes">
+        <button type="submit" class="btn btn-primary">{{ 'Salvar alterações' if equipamento else 'Cadastrar' }}</button>
+        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
+    </div>
+</form>
+
+<script>
+function alternarCategoriaCustomizada() {
+    const select = document.getElementById('categoria');
+    const campoCustom = document.getElementById('categoria_customizada');
+    if (select.value === 'Outro') {
+        campoCustom.style.display = 'block';
+        campoCustom.required = true;
+    } else {
+        campoCustom.style.display = 'none';
+        campoCustom.required = false;
+    }
+}
+document.addEventListener('DOMContentLoaded', alternarCategoriaCustomizada);
+</script>
+{% endblock %}

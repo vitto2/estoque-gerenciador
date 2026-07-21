@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+{% if total_registros == 0 %}
+<div class="estado-vazio">
+    <p>Ainda não há equipamentos cadastrados para gerar o dashboard.</p>
+    <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar o primeiro equipamento</a>
+</div>
+{% else %}
+<div class="resumo-cards">
+    <div class="card-resumo">
+        <span class="card-resumo-valor">{{ total_itens }}</span>
+        <span class="card-resumo-label">Itens em estoque</span>
+    </div>
+    <div class="card-resumo">
+        <span class="card-resumo-valor">{{ total_registros }}</span>
+        <span class="card-resumo-label">Equipamentos cadastrados</span>
+    </div>
+</div>
+
+<div class="graficos-grid">
+    <div class="card-grafico">
+        <h2>Quantidade total por categoria</h2>
+        <canvas id="graficoCategoria"></canvas>
+    </div>
+    <div class="card-grafico">
+        <h2>Distribuição por status</h2>
+        <canvas id="graficoStatus"></canvas>
+    </div>
+    <div class="card-grafico card-grafico-largo">
+        <h2>Evolução de cadastros ao longo do tempo</h2>
+        <canvas id="graficoEvolucao"></canvas>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+<script>
+const dadosCategoria = { labels: {{ categorias_labels|tojson }}, valores: {{ categorias_valores|tojson }} };
+const dadosStatus = { labels: {{ status_labels|tojson }}, valores: {{ status_valores|tojson }} };
+const dadosEvolucao = { labels: {{ evolucao_labels|tojson }}, valores: {{ evolucao_valores|tojson }} };
+
+const coresStatus = {
+    'Disponível': '#16A34A',
+    'Em uso': '#2563EB',
+    'Manutenção': '#D97706',
+    'Baixado': '#6B7280',
+};
+
+new Chart(document.getElementById('graficoCategoria'), {
+    type: 'bar',
+    data: {
+        labels: dadosCategoria.labels,
+        datasets: [{ label: 'Quantidade', data: dadosCategoria.valores, backgroundColor: '#2D6CA3', borderRadius: 4 }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+});
+
+new Chart(document.getElementById('graficoStatus'), {
+    type: 'doughnut',
+    data: {
+        labels: dadosStatus.labels,
+        datasets: [{ data: dadosStatus.valores, backgroundColor: dadosStatus.labels.map(l => coresStatus[l] || '#9CA3AF') }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('graficoEvolucao'), {
+    type: 'line',
+    data: {
+        labels: dadosEvolucao.labels,
+        datasets: [{
+            label: 'Registros',
+            data: dadosEvolucao.valores,
+            borderColor: '#2D6CA3',
+            backgroundColor: 'rgba(45, 108, 163, 0.15)',
+            tension: 0.25,
+            fill: true,
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

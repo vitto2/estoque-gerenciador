@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Estoque de TI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="{{ url_for('equipamentos.listagem') }}">Estoque de TI</a>
+            <nav class="nav">
+                <a href="{{ url_for('equipamentos.listagem') }}"
+                   class="{{ 'active' if request.endpoint == 'equipamentos.listagem' else '' }}">Estoque</a>
+                <a href="{{ url_for('equipamentos.novo') }}"
+                   class="{{ 'active' if request.endpoint == 'equipamentos.novo' else '' }}">+ Novo Equipamento</a>
+                <a href="{{ url_for('dashboard.dashboard') }}"
+                   class="{{ 'active' if request.endpoint == 'dashboard.dashboard' else '' }}">Dashboard</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                <div class="flash-container">
+                    {% for categoria, mensagem in mensagens %}
+                        <div class="flash flash-{{ categoria }}">{{ mensagem }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
