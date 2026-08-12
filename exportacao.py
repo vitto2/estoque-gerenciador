@@ -10,6 +10,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 CABECALHOS = [
     "Nome/Tipo",
+    "Número de Série",
     "Categoria",
     "Quantidade",
     "Data de Registro",
@@ -17,9 +18,9 @@ CABECALHOS = [
     "Status",
 ]
 
-LARGURAS_COLUNAS = [32, 20, 12, 20, 24, 16]
+LARGURAS_COLUNAS = [32, 22, 20, 12, 20, 24, 16]
 
-COR_CABECALHO = "1E3A5F"  # mesma cor da topbar do site, pra manter identidade visual
+COR_CABECALHO = "3483FA"
 
 
 def gerar_planilha_equipamentos(itens):
@@ -47,6 +48,7 @@ def gerar_planilha_equipamentos(itens):
         ws.append(
             [
                 item.nome,
+                item.serial or "",
                 item.categoria,
                 item.quantidade,
                 item.data_registro.strftime("%d/%m/%Y %H:%M"),

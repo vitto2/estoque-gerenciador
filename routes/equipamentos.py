@@ -127,6 +127,70 @@ def _aplicar_filtros(query, filtros):
     return query
 
 
+def _contexto_lote(form_data=None, seriais=None):
+    fd = form_data or {}
+    return {
+        "valores": {
+            "nome": fd.get("nome", ""),
+            "categoria": fd.get("categoria", ""),
+            "categoria_customizada": fd.get("categoria_customizada", ""),
+            "tecnico_responsavel": fd.get("tecnico_responsavel", ""),
+            "status": fd.get("status", "Disponível"),
+        },
+        "seriais": seriais if seriais is not None else [""],
+        "categorias": get_categorias_disponiveis() + ["Outro"],
+        "status_opcoes": STATUS_OPCOES,
+        "tecnicos_existentes": get_tecnicos_existentes(),
+    }
+
+
+@equipamentos_bp.route("/lote", methods=["GET", "POST"])
+def lote():
+    if request.method == "POST":
+        nome = (request.form.get("nome") or "").strip()
+        categoria = (request.form.get("categoria") or "").strip()
+        if categoria == "Outro":
+            categoria = (request.form.get("categoria_customizada") or "").strip()
+        tecnico = (request.form.get("tecnico_responsavel") or "").strip()
+        status = (request.form.get("status") or "").strip()
+        seriais_raw = request.form.getlist("serial")
+
+        erros = []
+        if not nome:
+            erros.append("Informe o nome/tipo do equipamento.")
+        if not categoria:
+            erros.append("Informe a categoria.")
+        if not tecnico:
+            erros.append("Informe o técnico responsável.")
+        if status not in STATUS_OPCOES:
+            erros.append("Selecione um status válido.")
+
+        seriais = [s.strip() for s in seriais_raw if s.strip()]
+        if not seriais:
+            erros.append("Adicione pelo menos um número de série.")
+
+        if erros:
+            for e in erros:
+                flash(e, "erro")
+            return render_template("lote.html", **_contexto_lote(form_data=request.form, seriais=seriais_raw))
+
+        for serial in seriais:
+            db.session.add(Equipamento(
+                nome=nome,
+                categoria=categoria,
+                quantidade=1,
+                serial=serial,
+                tecnico_responsavel=tecnico,
+                status=status,
+            ))
+        db.session.commit()
+        n = len(seriais)
+        flash(f'{n} equipamento{"s" if n > 1 else ""} cadastrado{"s" if n > 1 else ""} com sucesso.', "sucesso")
+        return redirect(url_for("equipamentos.listagem"))
+
+    return render_template("lote.html", **_contexto_lote())
+
+
 @equipamentos_bp.route("/")
 def listagem():
     filtros = _filtros_atuais()

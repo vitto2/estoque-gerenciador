@@ -67,6 +67,7 @@
         <thead>
             <tr>
                 <th>Nome / Tipo</th>
+                <th>Serial</th>
                 <th>Categoria</th>
                 <th>Qtd</th>
                 <th>Registrado em</th>
@@ -79,6 +80,13 @@
             {% for item in itens %}
             <tr>
                 <td><span class="item-nome">{{ item.nome }}</span></td>
+                <td>
+                    {% if item.serial %}
+                        <span class="item-serial">{{ item.serial }}</span>
+                    {% else %}
+                        <span class="item-sem-serial">—</span>
+                    {% endif %}
+                </td>
                 <td><span class="item-categoria">{{ item.categoria }}</span></td>
                 <td><span class="item-qtd">{{ item.quantidade }}</span></td>
                 <td><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>

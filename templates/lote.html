@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}Cadastro em Lote — Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Cadastro em lote</h1>
+        <p class="page-subtitle">Preencha os dados comuns e adicione um serial por linha</p>
+    </div>
+</div>
+
+<form method="post" id="form-lote">
+
+    {# ── Dados comuns ─────────────────────────────────────────────── #}
+    <div class="lote-card" style="margin-bottom: 20px;">
+        <div class="lote-card-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+            </svg>
+            <span>Dados comuns a todos os equipamentos</span>
+        </div>
+
+        <div class="lote-campos-comuns">
+            <div class="campo">
+                <label for="nome">Nome / Tipo</label>
+                <input type="text" id="nome" name="nome" required
+                       value="{{ valores.nome }}"
+                       placeholder="Ex.: Notebook Dell Latitude 5420">
+            </div>
+
+            <div class="campo">
+                <label for="categoria">Categoria</label>
+                <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
+                    <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
+                    {% for c in categorias %}
+                        <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" id="categoria_customizada" name="categoria_customizada"
+                       placeholder="Nova categoria"
+                       value="{{ valores.categoria_customizada }}"
+                       style="display:none; margin-top:8px;">
+            </div>
+
+            <div class="campo">
+                <label for="tecnico_responsavel">Técnico responsável</label>
+                <input type="text" id="tecnico_responsavel" name="tecnico_responsavel"
+                       list="lista-tecnicos" required
+                       value="{{ valores.tecnico_responsavel }}"
+                       placeholder="Nome do técnico">
+                <datalist id="lista-tecnicos">
+                    {% for t in tecnicos_existentes %}
+                        <option value="{{ t }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <div class="campo">
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    {% for s in status_opcoes %}
+                        <option value="{{ s }}" {{ 'selected' if s == valores.status else '' }}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {# ── Seriais ───────────────────────────────────────────────────── #}
+    <div class="lote-card">
+        <div class="lote-card-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                <line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/>
+            </svg>
+            <span>Números de série</span>
+            <span class="lote-contador-badge" id="lote-contador">{{ seriais|length }}</span>
+        </div>
+
+        <div class="lote-seriais-wrapper">
+            <table class="lote-tabela">
+                <thead>
+                    <tr>
+                        <th class="col-seq">#</th>
+                        <th>Número de série</th>
+                        <th class="col-acao"></th>
+                    </tr>
+                </thead>
+                <tbody id="seriais-tbody">
+                    {% for s in seriais %}
+                    <tr class="serial-row">
+                        <td><span class="serial-seq">{{ loop.index }}</span></td>
+                        <td>
+                            <input type="text" name="serial" class="serial-input"
+                                   value="{{ s }}" placeholder="Ex.: SN-DELL-5420-001"
+                                   autocomplete="off" spellcheck="false">
+                        </td>
+                        <td>
+                            <button type="button" class="btn-remove-serial" onclick="removerLinha(this)" title="Remover">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="lote-add-area">
+            <button type="button" class="btn-add-serial" onclick="adicionarLinha()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Adicionar serial
+            </button>
+            <span class="lote-hint">Dica: pressione <kbd>Enter</kbd> para adicionar a próxima linha</span>
+        </div>
+    </div>
+
+    {# ── Ações ────────────────────────────────────────────────────── #}
+    <div class="form-acoes" style="margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Cadastrar <span id="btn-count">{{ seriais|length }}</span> equipamento<span id="btn-plural">{{ 's' if seriais|length != 1 else '' }}</span>
+        </button>
+        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
+    </div>
+
+</form>
+
+<script>
+function atualizarContador() {
+    const rows = document.querySelectorAll('.serial-row');
+    const n = rows.length;
+    document.getElementById('lote-contador').textContent = n;
+    document.getElementById('btn-count').textContent = n;
+    document.getElementById('btn-plural').textContent = n === 1 ? '' : 's';
+}
+
+function atualizarNumeracao() {
+    document.querySelectorAll('.serial-seq').forEach((el, i) => {
+        el.textContent = i + 1;
+    });
+}
+
+function adicionarLinha(valor = '') {
+    const tbody = document.getElementById('seriais-tbody');
+    const seq = tbody.querySelectorAll('.serial-row').length + 1;
+    const tr = document.createElement('tr');
+    tr.className = 'serial-row';
+    tr.innerHTML = `
+        <td><span class="serial-seq">${seq}</span></td>
+        <td><input type="text" name="serial" class="serial-input"
+                   value="${valor}" placeholder="Ex.: SN-DELL-5420-00${seq}"
+                   autocomplete="off" spellcheck="false"></td>
+        <td><button type="button" class="btn-remove-serial" onclick="removerLinha(this)" title="Remover">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button></td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelector('.serial-input').focus();
+    atualizarContador();
+}
+
+function removerLinha(btn) {
+    const rows = document.querySelectorAll('.serial-row');
+    if (rows.length <= 1) return;
+    btn.closest('tr').remove();
+    atualizarNumeracao();
+    atualizarContador();
+}
+
+// Enter no campo serial → adiciona próxima linha
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('serial-input')) {
+        e.preventDefault();
+        adicionarLinha();
+    }
+});
+
+// Colar múltiplos seriais de uma vez (um por linha)
+document.addEventListener('paste', function(e) {
+    if (!e.target.classList.contains('serial-input')) return;
+    const texto = (e.clipboardData || window.clipboardData).getData('text');
+    const linhas = texto.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+    if (linhas.length <= 1) return;
+    e.preventDefault();
+    e.target.value = linhas[0];
+    for (let i = 1; i < linhas.length; i++) adicionarLinha(linhas[i]);
+    atualizarContador();
+});
+
+function alternarCategoriaCustomizada() {
+    const select = document.getElementById('categoria');
+    const campoCustom = document.getElementById('categoria_customizada');
+    if (select.value === 'Outro') {
+        campoCustom.style.display = 'block';
+        campoCustom.required = true;
+    } else {
+        campoCustom.style.display = 'none';
+        campoCustom.required = false;
+    }
+}
+document.addEventListener('DOMContentLoaded', alternarCategoriaCustomizada);
+</script>
+{% endblock %}

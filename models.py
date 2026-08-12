@@ -42,6 +42,7 @@ class Equipamento(db.Model):
     nome = db.Column(db.String(150), nullable=False)
     categoria = db.Column(db.String(50), nullable=False)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
+    serial = db.Column(db.String(100), nullable=True)
     data_registro = db.Column(db.DateTime, nullable=False, default=datetime.now)
     tecnico_responsavel = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="Disponível")

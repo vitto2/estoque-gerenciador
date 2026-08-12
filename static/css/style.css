@@ -636,12 +636,190 @@ input:focus {
 
 .card-grafico-largo { grid-column: 1 / -1; }
 
+/* ── SERIAL BADGE (listing) ──────────────────────────────────────────────── */
+.item-serial {
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ml-blue);
+    background: var(--ml-blue-light);
+    padding: 3px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+.item-sem-serial { color: var(--text-light); font-size: 13px; }
+
+/* ── BATCH FORM ──────────────────────────────────────────────────────────── */
+.lote-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.lote-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    background: #FAFAFA;
+    border-bottom: 1.5px solid var(--border);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+
+.lote-campos-comuns {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    padding: 24px;
+}
+
+.lote-contador-badge {
+    margin-left: auto;
+    background: var(--ml-blue);
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    transition: background var(--transition);
+}
+
+.lote-seriais-wrapper { overflow-x: auto; }
+
+.lote-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lote-tabela th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-light);
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+}
+
+.lote-tabela td {
+    padding: 6px 16px;
+    border-bottom: 1px solid #F5F5F5;
+    vertical-align: middle;
+}
+
+.lote-tabela tbody tr:last-child td { border-bottom: none; }
+
+.lote-tabela tbody tr:hover { background: #FAFBFF; }
+
+.lote-tabela .col-seq { width: 52px; }
+.lote-tabela .col-acao { width: 52px; }
+
+.serial-seq {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--neutral-bg);
+    color: var(--text-light);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.serial-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: white;
+    color: var(--text);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.serial-input:focus {
+    outline: none;
+    border-color: var(--ml-blue);
+    box-shadow: 0 0 0 3px rgba(52,131,250,0.15);
+}
+
+.serial-input::placeholder { color: var(--text-light); font-weight: 400; }
+
+.btn-remove-serial {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    transition: background var(--transition), color var(--transition);
+}
+.btn-remove-serial:hover { background: var(--ml-red-light); color: var(--ml-red); }
+
+.lote-add-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 24px;
+    border-top: 1.5px dashed var(--border);
+}
+
+.btn-add-serial {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border: 1.5px dashed var(--ml-blue);
+    border-radius: var(--radius);
+    background: none;
+    color: var(--ml-blue);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background var(--transition), border-style var(--transition);
+}
+.btn-add-serial:hover { background: var(--ml-blue-light); border-style: solid; }
+
+.lote-hint {
+    font-size: 12px;
+    color: var(--text-light);
+}
+.lote-hint kbd {
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
 @media (max-width: 800px) {
     .graficos-grid { grid-template-columns: 1fr; }
     .filtro-acoes { margin-left: 0; width: 100%; }
     .filtro-acoes .btn { flex: 1; }
     .resumo-cards { grid-template-columns: 1fr 1fr; }
+    .lote-campos-comuns { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 640px) {
