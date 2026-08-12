@@ -71,6 +71,7 @@
                 <th>Categoria</th>
                 <th>Qtd</th>
                 <th>Registrado em</th>
+                <th>Local</th>
                 <th>Técnico</th>
                 <th>Status</th>
                 <th></th>
@@ -90,6 +91,13 @@
                 <td><span class="item-categoria">{{ item.categoria }}</span></td>
                 <td><span class="item-qtd">{{ item.quantidade }}</span></td>
                 <td><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>
+                <td>
+                    {% if item.local_armazenamento %}
+                        <span class="item-local">{{ item.local_armazenamento }}</span>
+                    {% else %}
+                        <span class="item-sem-serial">—</span>
+                    {% endif %}
+                </td>
                 <td><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
                 <td>
                     <span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span>

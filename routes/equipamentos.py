@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
 
 from exportacao import gerar_planilha_equipamentos
-from models import CATEGORIAS, STATUS_OPCOES, Equipamento, db
+from models import CATEGORIAS, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES, Equipamento, db
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
 
@@ -38,6 +38,7 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "quantidade": form_data.get("quantidade", ""),
             "tecnico_responsavel": form_data.get("tecnico_responsavel", ""),
             "status": form_data.get("status", "Disponível"),
+            "local_armazenamento": form_data.get("local_armazenamento", ""),
         }
     if equipamento is not None:
         return {
@@ -47,6 +48,7 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "quantidade": equipamento.quantidade,
             "tecnico_responsavel": equipamento.tecnico_responsavel,
             "status": equipamento.status,
+            "local_armazenamento": equipamento.local_armazenamento or "",
         }
     return {
         "nome": "",
@@ -55,6 +57,7 @@ def _valores_iniciais(equipamento=None, form_data=None):
         "quantidade": 1,
         "tecnico_responsavel": "",
         "status": "Disponível",
+        "local_armazenamento": "",
     }
 
 
@@ -89,12 +92,15 @@ def _validar_dados(form):
     if status not in STATUS_OPCOES:
         erros.append("Selecione um status válido.")
 
+    local = (form.get("local_armazenamento") or "").strip() or None
+
     dados = {
         "nome": nome,
         "categoria": categoria,
         "quantidade": quantidade,
         "tecnico_responsavel": tecnico,
         "status": status,
+        "local_armazenamento": local,
     }
     return dados, erros
 
@@ -105,6 +111,7 @@ def _contexto_form(equipamento=None, form_data=None):
         "valores": _valores_iniciais(equipamento=equipamento, form_data=form_data),
         "categorias": get_categorias_disponiveis() + ["Outro"],
         "status_opcoes": STATUS_OPCOES,
+        "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
 
@@ -136,10 +143,12 @@ def _contexto_lote(form_data=None, seriais=None):
             "categoria_customizada": fd.get("categoria_customizada", ""),
             "tecnico_responsavel": fd.get("tecnico_responsavel", ""),
             "status": fd.get("status", "Disponível"),
+            "local_armazenamento": fd.get("local_armazenamento", ""),
         },
         "seriais": seriais if seriais is not None else [""],
         "categorias": get_categorias_disponiveis() + ["Outro"],
         "status_opcoes": STATUS_OPCOES,
+        "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
 
@@ -174,12 +183,14 @@ def lote():
                 flash(e, "erro")
             return render_template("lote.html", **_contexto_lote(form_data=request.form, seriais=seriais_raw))
 
+        local = (request.form.get("local_armazenamento") or "").strip() or None
         for serial in seriais:
             db.session.add(Equipamento(
                 nome=nome,
                 categoria=categoria,
                 quantidade=1,
                 serial=serial,
+                local_armazenamento=local,
                 tecnico_responsavel=tecnico,
                 status=status,
             ))

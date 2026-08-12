@@ -34,6 +34,12 @@ STATUS_OPCOES = [
     "Baixado",
 ]
 
+LOCAIS_ARMAZENAMENTO = [
+    "Operação",
+    "Meli-help Is",
+    "Estoque TI G200",
+]
+
 
 class Equipamento(db.Model):
     __tablename__ = "equipamentos"
@@ -43,6 +49,7 @@ class Equipamento(db.Model):
     categoria = db.Column(db.String(50), nullable=False)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     serial = db.Column(db.String(100), nullable=True)
+    local_armazenamento = db.Column(db.String(50), nullable=True)
     data_registro = db.Column(db.DateTime, nullable=False, default=datetime.now)
     tecnico_responsavel = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="Disponível")

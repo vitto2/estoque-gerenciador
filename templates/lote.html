@@ -64,6 +64,16 @@
                     {% endfor %}
                 </select>
             </div>
+
+            <div class="campo">
+                <label for="local_armazenamento">Local de armazenamento</label>
+                <select id="local_armazenamento" name="local_armazenamento">
+                    <option value="">Não informado</option>
+                    {% for l in locais_armazenamento %}
+                        <option value="{{ l }}" {{ 'selected' if l == valores.local_armazenamento else '' }}>{{ l }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
 

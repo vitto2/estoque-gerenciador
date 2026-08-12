@@ -13,12 +13,13 @@ CABECALHOS = [
     "Número de Série",
     "Categoria",
     "Quantidade",
+    "Local de Armazenamento",
     "Data de Registro",
     "Técnico Responsável",
     "Status",
 ]
 
-LARGURAS_COLUNAS = [32, 22, 20, 12, 20, 24, 16]
+LARGURAS_COLUNAS = [32, 22, 20, 12, 22, 20, 24, 16]
 
 COR_CABECALHO = "3483FA"
 
@@ -51,6 +52,7 @@ def gerar_planilha_equipamentos(itens):
                 item.serial or "",
                 item.categoria,
                 item.quantidade,
+                item.local_armazenamento or "",
                 item.data_registro.strftime("%d/%m/%Y %H:%M"),
                 item.tecnico_responsavel,
                 item.status,

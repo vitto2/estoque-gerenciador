@@ -650,6 +650,16 @@ input:focus {
 }
 .item-sem-serial { color: var(--text-light); font-size: 13px; }
 
+.item-local {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6B46C1;
+    background: #F3EEFF;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
 /* ── BATCH FORM ──────────────────────────────────────────────────────────── */
 .lote-card {
     background: var(--surface);
@@ -672,7 +682,7 @@ input:focus {
 
 .lote-campos-comuns {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
     gap: 16px;
     padding: 24px;
 }
@@ -820,6 +830,7 @@ input:focus {
     .filtro-acoes .btn { flex: 1; }
     .resumo-cards { grid-template-columns: 1fr 1fr; }
     .lote-campos-comuns { grid-template-columns: 1fr 1fr; }
+    .lote-campos-comuns .campo:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 640px) {
