@@ -68,6 +68,7 @@
             <tr>
                 <th>Nome / Tipo</th>
                 <th>Serial</th>
+                <th>Ticket</th>
                 <th>Categoria</th>
                 <th>Qtd</th>
                 <th>Registrado em</th>
@@ -84,6 +85,13 @@
                 <td>
                     {% if item.serial %}
                         <span class="item-serial">{{ item.serial }}</span>
+                    {% else %}
+                        <span class="item-sem-serial">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.ticket_jira %}
+                        <span class="item-ticket">{{ item.ticket_jira }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}

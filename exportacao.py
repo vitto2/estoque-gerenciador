@@ -11,6 +11,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 CABECALHOS = [
     "Nome/Tipo",
     "Número de Série",
+    "Ticket Jira",
     "Categoria",
     "Quantidade",
     "Local de Armazenamento",
@@ -19,7 +20,7 @@ CABECALHOS = [
     "Status",
 ]
 
-LARGURAS_COLUNAS = [32, 22, 20, 12, 22, 20, 24, 16]
+LARGURAS_COLUNAS = [32, 22, 14, 20, 12, 22, 20, 24, 16]
 
 COR_CABECALHO = "3483FA"
 
@@ -50,6 +51,7 @@ def gerar_planilha_equipamentos(itens):
             [
                 item.nome,
                 item.serial or "",
+                item.ticket_jira or "",
                 item.categoria,
                 item.quantidade,
                 item.local_armazenamento or "",

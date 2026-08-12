@@ -40,6 +40,18 @@ LOCAIS_ARMAZENAMENTO = [
     "Estoque TI G200",
 ]
 
+_STATUS_SLUGS = {
+    "Disponível": "disponivel",
+    "Em uso": "em-uso",
+    "Manutenção": "manutencao",
+    "Baixado": "baixado",
+}
+
+
+def status_slug(status):
+    """Versão sem acento/espaço do status, pra usar como classe CSS."""
+    return _STATUS_SLUGS.get(status, "outro")
+
 
 class Equipamento(db.Model):
     __tablename__ = "equipamentos"
@@ -50,16 +62,10 @@ class Equipamento(db.Model):
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     serial = db.Column(db.String(100), nullable=True)
     local_armazenamento = db.Column(db.String(50), nullable=True)
+    ticket_jira = db.Column(db.String(50), nullable=True)
     data_registro = db.Column(db.DateTime, nullable=False, default=datetime.now)
     tecnico_responsavel = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="Disponível")
-
-    _STATUS_SLUGS = {
-        "Disponível": "disponivel",
-        "Em uso": "em-uso",
-        "Manutenção": "manutencao",
-        "Baixado": "baixado",
-    }
 
     def __repr__(self):
         return f"<Equipamento {self.id} {self.nome} ({self.categoria}) - {self.status}>"
@@ -67,7 +73,7 @@ class Equipamento(db.Model):
     @property
     def status_slug(self):
         """Versão sem acento/espaço do status, pra usar como classe CSS."""
-        return self._STATUS_SLUGS.get(self.status, "outro")
+        return status_slug(self.status)
 
     def to_dict(self):
         """Serialização usada pelas rotas do dashboard."""

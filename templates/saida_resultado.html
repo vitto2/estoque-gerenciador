@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Resultado da Saída — Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Resultado da saída</h1>
+        <p class="page-subtitle">
+            {% if ticket %}Ticket <strong>{{ ticket }}</strong> · {% endif %}
+            Novo status: <strong>{{ status_novo }}</strong>
+        </p>
+    </div>
+</div>
+
+{# ── Resumo ─────────────────────────────────────────────────── #}
+<div class="resultado-resumo">
+    <div class="resultado-card resultado-ok">
+        <span class="resultado-numero">{{ encontrados|length }}</span>
+        <span class="resultado-label">atualizados</span>
+    </div>
+    {% if nao_encontrados %}
+    <div class="resultado-card resultado-erro">
+        <span class="resultado-numero">{{ nao_encontrados|length }}</span>
+        <span class="resultado-label">não encontrados</span>
+    </div>
+    {% endif %}
+    <div class="resultado-card resultado-total">
+        <span class="resultado-numero">{{ (encontrados|length) + (nao_encontrados|length) }}</span>
+        <span class="resultado-label">seriais processados</span>
+    </div>
+</div>
+
+{# ── Detalhes ───────────────────────────────────────────────── #}
+<div class="resultado-listas">
+
+    {% if encontrados %}
+    <div class="lote-card">
+        <div class="lote-card-header" style="color: var(--ml-green);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>Atualizados com sucesso</span>
+            <span class="lote-contador-badge" style="background: var(--ml-green);">{{ encontrados|length }}</span>
+        </div>
+        <ul class="resultado-lista">
+            {% for serial in encontrados %}
+            <li class="resultado-item resultado-item-ok">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="resultado-serial">{{ serial }}</span>
+                <span class="resultado-status-badge status-badge status-{{ status_novo_slug }}">{{ status_novo }}</span>
+                {% if ticket %}<span class="resultado-ticket">{{ ticket }}</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if nao_encontrados %}
+    <div class="lote-card" style="margin-top: 16px;">
+        <div class="lote-card-header" style="color: var(--ml-red);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <span>Seriais não encontrados no estoque</span>
+            <span class="lote-contador-badge" style="background: var(--ml-red);">{{ nao_encontrados|length }}</span>
+        </div>
+        <ul class="resultado-lista">
+            {% for serial in nao_encontrados %}
+            <li class="resultado-item resultado-item-erro">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <span class="resultado-serial">{{ serial }}</span>
+                <span class="resultado-hint">verifique se o serial está cadastrado</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="form-acoes" style="margin-top: 24px;">
+    <a href="{{ url_for('equipamentos.saida') }}" class="btn btn-saida">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
+        Nova saída
+    </a>
+    <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Ver estoque</a>
+</div>
+{% endblock %}

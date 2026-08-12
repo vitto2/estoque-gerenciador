@@ -650,6 +650,18 @@ input:focus {
 }
 .item-sem-serial { color: var(--text-light); font-size: 13px; }
 
+.item-ticket {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0052CC;
+    background: #E8F0FF;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    letter-spacing: 0.02em;
+}
+
 .item-local {
     font-size: 12px;
     font-weight: 700;
@@ -823,6 +835,130 @@ input:focus {
     font-weight: 700;
 }
 
+/* ── SAÍDA DE EQUIPAMENTOS ───────────────────────────────────────────────── */
+.saida-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.saida-sidebar-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 18px; }
+
+.saida-textarea {
+    width: 100%;
+    min-height: 280px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--text);
+    resize: vertical;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    background: white;
+}
+.saida-textarea:focus {
+    outline: none;
+    border-color: var(--ml-blue);
+    box-shadow: 0 0 0 3px rgba(52,131,250,0.15);
+}
+.saida-textarea::placeholder { color: var(--text-light); font-weight: 400; }
+
+.btn-saida {
+    background: var(--ml-orange);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255,119,51,0.30);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+}
+.btn-saida:hover { background: #E06520; box-shadow: 0 4px 14px rgba(255,119,51,0.35); text-decoration: none; color: white; }
+.btn-saida:active { transform: scale(0.97); }
+
+/* ── RESULTADO DA SAÍDA ──────────────────────────────────────────────────── */
+.resultado-resumo {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.resultado-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 20px 28px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+    border-top: 4px solid var(--border);
+}
+.resultado-ok    { border-top-color: var(--ml-green); }
+.resultado-erro  { border-top-color: var(--ml-red); }
+.resultado-total { border-top-color: var(--ml-blue); }
+
+.resultado-numero {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+}
+.resultado-label { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+
+.resultado-listas { display: flex; flex-direction: column; gap: 16px; }
+
+.resultado-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.resultado-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    border-bottom: 1px solid #F5F5F5;
+    font-size: 14px;
+}
+.resultado-item:last-child { border-bottom: none; }
+.resultado-item-ok  > svg { color: var(--ml-green); flex-shrink: 0; }
+.resultado-item-erro > svg { color: var(--ml-red); flex-shrink: 0; }
+
+.resultado-serial {
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    flex: 1;
+}
+
+.resultado-ticket {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0052CC;
+    background: #E8F0FF;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+.resultado-hint { font-size: 12px; color: var(--text-light); }
+
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
 @media (max-width: 800px) {
     .graficos-grid { grid-template-columns: 1fr; }
@@ -831,6 +967,7 @@ input:focus {
     .resumo-cards { grid-template-columns: 1fr 1fr; }
     .lote-campos-comuns { grid-template-columns: 1fr 1fr; }
     .lote-campos-comuns .campo:first-child { grid-column: 1 / -1; }
+    .saida-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {

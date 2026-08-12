@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Saída de Equipamentos — Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Saída de equipamentos</h1>
+        <p class="page-subtitle">Cole os seriais, informe o ticket e atualize o status em lote</p>
+    </div>
+</div>
+
+<form method="post" id="form-saida">
+    <div class="saida-layout">
+
+        {# ── Painel lateral ─────────────────────────────────── #}
+        <div class="saida-sidebar">
+            <div class="lote-card">
+                <div class="lote-card-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+                    </svg>
+                    <span>Dados da saída</span>
+                </div>
+                <div class="saida-sidebar-body">
+                    <div class="campo">
+                        <label for="ticket_jira">Ticket Jira</label>
+                        <input type="text" id="ticket_jira" name="ticket_jira"
+                               value="{{ form_ticket }}"
+                               placeholder="Ex.: SUPP-1234"
+                               autocomplete="off" spellcheck="false">
+                        <span class="campo-hint">Deixe em branco se não houver ticket</span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="status">Novo status</label>
+                        <select id="status" name="status" required>
+                            {% for s in status_opcoes %}
+                                <option value="{{ s }}" {{ 'selected' if s == form_status else '' }}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Área principal ─────────────────────────────────── #}
+        <div class="saida-main">
+            <div class="lote-card">
+                <div class="lote-card-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="2"/>
+                        <line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/>
+                    </svg>
+                    <span>Números de série</span>
+                    <span class="lote-contador-badge" id="saida-contador">0</span>
+                </div>
+
+                <div style="padding: 20px 24px 0;">
+                    <textarea id="seriais_texto" name="seriais_texto"
+                              class="saida-textarea"
+                              placeholder="Cole ou digite os seriais aqui, um por linha:
+
+SN-DELL-5420-001
+SN-DELL-5420-002
+SN-HP-840-015"
+                              spellcheck="false"
+                              autocomplete="off">{{ form_texto }}</textarea>
+                </div>
+
+                <div class="lote-add-area" style="border-top: 1px solid var(--border); margin-top: 12px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color: var(--text-light); flex-shrink:0">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span class="lote-hint">
+                        Cole diretamente de uma planilha Excel, e-mail ou Jira — cada linha vira um serial.
+                        Espaços extras são ignorados automaticamente.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-acoes" style="margin-top: 24px;">
+        <button type="submit" class="btn btn-saida" id="btn-submit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/>
+            </svg>
+            Processar saída — <span id="btn-count">0</span> serial<span id="btn-plural"></span>
+        </button>
+        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
+    </div>
+</form>
+
+<script>
+const textarea = document.getElementById('seriais_texto');
+const contador = document.getElementById('saida-contador');
+const btnCount = document.getElementById('btn-count');
+const btnPlural = document.getElementById('btn-plural');
+
+function contarSeriais() {
+    const n = textarea.value.split('\n').filter(l => l.trim()).length;
+    contador.textContent = n;
+    btnCount.textContent = n;
+    btnPlural.textContent = n === 1 ? '' : 'is';
+    return n;
+}
+
+textarea.addEventListener('input', contarSeriais);
+document.addEventListener('DOMContentLoaded', contarSeriais);
+</script>
+{% endblock %}

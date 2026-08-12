@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
 
 from exportacao import gerar_planilha_equipamentos
-from models import CATEGORIAS, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES, Equipamento, db
+from models import CATEGORIAS, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES, Equipamento, db, status_slug
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
 
@@ -200,6 +200,56 @@ def lote():
         return redirect(url_for("equipamentos.listagem"))
 
     return render_template("lote.html", **_contexto_lote())
+
+
+@equipamentos_bp.route("/saida", methods=["GET", "POST"])
+def saida():
+    if request.method == "POST":
+        ticket = (request.form.get("ticket_jira") or "").strip() or None
+        status_novo = (request.form.get("status") or "Em uso").strip()
+        texto = request.form.get("seriais_texto") or ""
+
+        seriais = [s.strip() for s in texto.splitlines() if s.strip()]
+
+        if not seriais:
+            flash("Cole ou digite pelo menos um número de série.", "erro")
+            return render_template("saida.html", status_opcoes=STATUS_OPCOES,
+                                   form_ticket=ticket or "", form_status=status_novo,
+                                   form_texto=texto)
+
+        if status_novo not in STATUS_OPCOES:
+            flash("Status inválido.", "erro")
+            return render_template("saida.html", status_opcoes=STATUS_OPCOES,
+                                   form_ticket=ticket or "", form_status=status_novo,
+                                   form_texto=texto)
+
+        encontrados, nao_encontrados = [], []
+        for serial in seriais:
+            item = Equipamento.query.filter(
+                db.func.lower(Equipamento.serial) == serial.lower()
+            ).first()
+            if item:
+                item.status = status_novo
+                if ticket:
+                    item.ticket_jira = ticket
+                encontrados.append(serial)
+            else:
+                nao_encontrados.append(serial)
+
+        if encontrados:
+            db.session.commit()
+
+        return render_template(
+            "saida_resultado.html",
+            ticket=ticket,
+            status_novo=status_novo,
+            status_novo_slug=status_slug(status_novo),
+            encontrados=encontrados,
+            nao_encontrados=nao_encontrados,
+        )
+
+    return render_template("saida.html", status_opcoes=STATUS_OPCOES,
+                           form_ticket="", form_status="Em uso", form_texto="")
 
 
 @equipamentos_bp.route("/")
