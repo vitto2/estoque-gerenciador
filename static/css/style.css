@@ -960,6 +960,102 @@ input:focus {
 
 .resultado-hint { font-size: 12px; color: var(--text-light); }
 
+/* ── CAMPOS: OBRIGATÓRIO / LEGENDAS ─────────────────────────────────────── */
+.campo-obrigatorio { color: var(--ml-red); font-weight: 800; }
+
+.status-legenda { display: block; line-height: 1.6; }
+
+.lote-campos-comuns-legenda {
+    padding: 0 24px 20px;
+    font-size: 12px;
+    color: var(--text-light);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin: 0 24px 20px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* ── SELETOR DE MODO DE CADASTRO (Um equipamento / Em lote) ─────────────── */
+.modo-cadastro-tabs {
+    display: inline-flex;
+    gap: 4px;
+    background: var(--neutral-bg);
+    padding: 4px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+}
+
+.modo-cadastro-tab {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background var(--transition), color var(--transition);
+}
+
+.modo-cadastro-tab:hover { text-decoration: none; color: var(--text); }
+
+.modo-cadastro-tab-ativo,
+.modo-cadastro-tab-ativo:hover {
+    background: var(--surface);
+    color: var(--ml-blue);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── GRÁFICOS: ALTURA CONTROLADA ─────────────────────────────────────────── */
+.grafico-canvas-wrap { position: relative; height: 280px; }
+
+/* ── POLIMENTO / ACESSIBILIDADE ──────────────────────────────────────────── */
+.card-grafico, .lote-card {
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+.card-grafico:hover, .lote-card:hover { box-shadow: var(--shadow); }
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav a:focus-visible,
+.bottom-nav a:focus-visible {
+    outline: 2px solid var(--ml-blue);
+    outline-offset: 2px;
+}
+
+/* ── BARRA DE NAVEGAÇÃO INFERIOR (mobile) ────────────────────────────────── */
+.bottom-nav {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-nav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 2px 7px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    border-top: 2px solid transparent;
+    min-height: 52px;
+}
+.bottom-nav a:hover { text-decoration: none; }
+.bottom-nav a.active { color: var(--ml-blue); border-top-color: var(--ml-blue); }
+
 /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
 @media (max-width: 800px) {
     .graficos-grid { grid-template-columns: 1fr; }
@@ -972,14 +1068,102 @@ input:focus {
 }
 
 @media (max-width: 640px) {
-    .topbar-inner { height: auto; flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
-    .nav { overflow-x: auto; width: 100%; }
-    .nav a { padding: 0 12px; font-size: 13px; }
-    .form-card { padding: 24px 20px; }
-    .resumo-cards { grid-template-columns: 1fr; }
-    .container { padding: 20px 16px 48px; }
-    .page-header h1 { font-size: 22px; }
-    .tabela-estoque th,
-    .tabela-estoque td { padding: 12px 14px; }
-    .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+    /* Navegação: barra fixa no rodapé substitui o menu do topo */
+    .nav-desktop { display: none; }
+    .bottom-nav { display: flex; }
+    .topbar-inner { height: 52px; padding: 0 16px; justify-content: center; }
+    .footer { display: none; }
+    body { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0)); }
+
+    .container { padding: 16px 14px 24px; }
+    .page-header { margin-bottom: 16px; }
+    .page-header h1 { font-size: 20px; }
+    .page-subtitle { font-size: 12.5px; }
+
+    /* Toque confortável: botões e campos maiores no touchscreen */
+    .btn { min-height: 44px; padding: 10px 18px; }
+    select, input[type="text"], input[type="number"], textarea,
+    .serial-input, .saida-textarea {
+        font-size: 16px; /* evita zoom automático do iOS Safari no foco */
+        min-height: 44px;
+    }
+    textarea, .saida-textarea { min-height: 140px; }
+
+    /* Filtros: cada campo ocupa a largura toda */
+    .filtros { padding: 16px; gap: 12px; }
+    .filtro-campo { min-width: 100%; }
+
+    .form-card { padding: 20px 16px; }
+    .resumo-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card-resumo { padding: 16px 14px; }
+    .card-resumo-valor { font-size: 28px; }
+    .grafico-canvas-wrap { height: 220px; }
+    .card-grafico { padding: 18px; }
+
+    .lote-campos-comuns { grid-template-columns: 1fr; }
+    .lote-campos-comuns .campo:first-child { grid-column: auto; }
+
+    .modo-cadastro-tabs { width: 100%; }
+    .modo-cadastro-tab { flex: 1; text-align: center; }
+
+    /* Tabela de estoque → lista de cartões, um por equipamento */
+    .tabela-wrapper { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
+    .tabela-estoque thead { display: none; }
+    .tabela-estoque, .tabela-estoque tbody, .tabela-estoque tr, .tabela-estoque td {
+        display: block;
+        width: 100%;
+    }
+    .tabela-estoque tbody tr {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 4px 14px;
+        margin-bottom: 12px;
+    }
+    .tabela-estoque tbody tr:hover { background: var(--surface); }
+    .tabela-estoque td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #F2F2F2;
+        text-align: right;
+    }
+    .tabela-estoque tbody tr:last-child td:last-child,
+    .tabela-estoque td:last-child { border-bottom: none; }
+    .tabela-estoque td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-light);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .tabela-estoque td.col-mobile-oculta { display: none; }
+    .tabela-estoque td.col-acoes-mobile {
+        justify-content: center;
+        gap: 20px;
+        padding: 10px 0 12px;
+    }
+    .tabela-estoque td.col-acoes-mobile::before { content: none; }
+    .tabela-estoque td.col-acoes-mobile .acoes { gap: 10px; }
+    .tabela-estoque td.col-acoes-mobile a,
+    .tabela-estoque td.col-acoes-mobile button {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .saida-sidebar-body { padding: 16px; }
+    .lote-add-area { flex-wrap: wrap; }
+
+    /* Resultado da saída: badge/dica quebram pra segunda linha em vez de
+       espremer o serial e forçar quebra no meio da palavra */
+    .resultado-item { flex-wrap: wrap; row-gap: 4px; padding: 10px 16px; }
+    .resultado-item > *:last-child { flex: 1 1 100%; margin-left: 23px; }
+    .resultado-resumo { gap: 10px; }
+    .resultado-card { padding: 16px 20px; min-width: 0; flex: 1; }
+    .resultado-numero { font-size: 30px; }
 }

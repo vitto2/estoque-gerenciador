@@ -4,11 +4,11 @@
 {% block content %}
 <div class="page-header">
     <div class="page-header-left">
-        <h1>Equipamentos em estoque</h1>
-        <p class="page-subtitle">Gerencie e consulte todos os equipamentos cadastrados</p>
+        <h1>Estoque de equipamentos</h1>
+        <p class="page-subtitle">Veja, edite ou remova qualquer equipamento cadastrado</p>
     </div>
     <span class="badge-count">
-        {{ itens|length }} {{ 'item' if itens|length == 1 else 'itens' }}
+        {{ itens|length }} {{ 'registro' if itens|length == 1 else 'registros' }}
     </span>
 </div>
 
@@ -50,7 +50,7 @@
             </svg>
             Filtrar
         </button>
-        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar</a>
+        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar filtros</a>
         <a href="{{ url_for('equipamentos.exportar', categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}"
            class="btn btn-exportar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -68,9 +68,9 @@
             <tr>
                 <th>Nome / Tipo</th>
                 <th>Serial</th>
-                <th>Ticket</th>
+                <th>Ticket Jira</th>
                 <th>Categoria</th>
-                <th>Qtd</th>
+                <th>Quantidade</th>
                 <th>Registrado em</th>
                 <th>Local</th>
                 <th>Técnico</th>
@@ -81,36 +81,36 @@
         <tbody>
             {% for item in itens %}
             <tr>
-                <td><span class="item-nome">{{ item.nome }}</span></td>
-                <td>
+                <td data-label="Nome / Tipo"><span class="item-nome">{{ item.nome }}</span></td>
+                <td data-label="Serial">
                     {% if item.serial %}
                         <span class="item-serial">{{ item.serial }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td>
+                <td data-label="Ticket Jira" class="col-mobile-oculta">
                     {% if item.ticket_jira %}
                         <span class="item-ticket">{{ item.ticket_jira }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td><span class="item-categoria">{{ item.categoria }}</span></td>
-                <td><span class="item-qtd">{{ item.quantidade }}</span></td>
-                <td><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>
-                <td>
+                <td data-label="Categoria"><span class="item-categoria">{{ item.categoria }}</span></td>
+                <td data-label="Quantidade"><span class="item-qtd">{{ item.quantidade }}</span></td>
+                <td data-label="Registrado em" class="col-mobile-oculta"><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>
+                <td data-label="Local">
                     {% if item.local_armazenamento %}
                         <span class="item-local">{{ item.local_armazenamento }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
-                <td>
-                    <span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span>
+                <td data-label="Técnico"><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
+                <td data-label="Status">
+                    <span class="status-badge status-{{ item.status_slug }}" title="{{ status_descricao(item.status) }}">{{ item.status }}</span>
                 </td>
-                <td class="acoes">
+                <td class="acoes col-acoes-mobile">
                     <a href="{{ url_for('equipamentos.editar', item_id=item.id) }}" title="Editar equipamento">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -135,13 +135,16 @@
     </table>
 </div>
 {% else %}
+{% set tem_filtro = filtro_categoria or filtro_status or filtro_tecnico %}
 <div class="estado-vazio">
     <span class="estado-vazio-icon">📦</span>
-    <h3>Nenhum equipamento encontrado</h3>
-    <p>{{ 'Tente ajustar os filtros ou' if filtro_categoria or filtro_status or filtro_tecnico else 'Comece cadastrando' }} um novo equipamento no sistema.</p>
-    {% if filtro_categoria or filtro_status or filtro_tecnico %}
+    {% if tem_filtro %}
+        <h3>Nenhum resultado com esses filtros</h3>
+        <p>Tente remover algum filtro para ver mais equipamentos.</p>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar filtros</a>
     {% else %}
+        <h3>Seu estoque está vazio</h3>
+        <p>Cadastre o primeiro equipamento para começar a organizar seu estoque.</p>
         <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
     {% endif %}
 </div>

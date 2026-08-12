@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="page-header-left">
         <h1>Saída de equipamentos</h1>
-        <p class="page-subtitle">Cole os seriais, informe o ticket e atualize o status em lote</p>
+        <p class="page-subtitle">Atualize o status de vários equipamentos de uma vez — ideal para liberações, manutenções e baixas em lote</p>
     </div>
 </div>
 
@@ -20,25 +20,28 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
                     </svg>
-                    <span>Dados da saída</span>
+                    <span>O que vai mudar</span>
                 </div>
                 <div class="saida-sidebar-body">
                     <div class="campo">
-                        <label for="ticket_jira">Ticket Jira</label>
-                        <input type="text" id="ticket_jira" name="ticket_jira"
-                               value="{{ form_ticket }}"
-                               placeholder="Ex.: SUPP-1234"
-                               autocomplete="off" spellcheck="false">
-                        <span class="campo-hint">Deixe em branco se não houver ticket</span>
-                    </div>
-
-                    <div class="campo">
-                        <label for="status">Novo status</label>
+                        <label for="status">Novo status <span class="campo-obrigatorio">*</span></label>
                         <select id="status" name="status" required>
                             {% for s in status_opcoes %}
                                 <option value="{{ s }}" {{ 'selected' if s == form_status else '' }}>{{ s }}</option>
                             {% endfor %}
                         </select>
+                        <span class="campo-hint status-legenda">
+                            {% for s in status_opcoes %}<strong>{{ s }}</strong>: {{ status_descricao(s) }}{{ ' · ' if not loop.last }}{% endfor %}
+                        </span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="ticket_jira">Ticket Jira <span class="campo-opcional">(opcional)</span></label>
+                        <input type="text" id="ticket_jira" name="ticket_jira"
+                               value="{{ form_ticket }}"
+                               placeholder="Ex.: SUPP-1234"
+                               autocomplete="off" spellcheck="false">
+                        <span class="campo-hint">Deixe em branco se não houver um chamado relacionado</span>
                     </div>
                 </div>
             </div>
@@ -88,7 +91,7 @@ SN-HP-840-015"
                 <polyline points="14 2 14 8 20 8"/>
                 <line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/>
             </svg>
-            Processar saída — <span id="btn-count">0</span> serial<span id="btn-plural"></span>
+            Atualizar <span id="btn-count">0</span> equipamento<span id="btn-plural"></span>
         </button>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
     </div>
@@ -104,7 +107,7 @@ function contarSeriais() {
     const n = textarea.value.split('\n').filter(l => l.trim()).length;
     contador.textContent = n;
     btnCount.textContent = n;
-    btnPlural.textContent = n === 1 ? '' : 'is';
+    btnPlural.textContent = n === 1 ? '' : 's';
     return n;
 }
 

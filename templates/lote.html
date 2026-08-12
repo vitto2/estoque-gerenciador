@@ -5,8 +5,13 @@
 <div class="page-header">
     <div class="page-header-left">
         <h1>Cadastro em lote</h1>
-        <p class="page-subtitle">Preencha os dados comuns e adicione um serial por linha</p>
+        <p class="page-subtitle">Use esta tela quando tiver várias unidades do mesmo modelo — só o número de série muda entre elas</p>
     </div>
+</div>
+
+<div class="modo-cadastro-tabs">
+    <a href="{{ url_for('equipamentos.novo') }}" class="modo-cadastro-tab">Um equipamento</a>
+    <span class="modo-cadastro-tab modo-cadastro-tab-ativo">Vários de uma vez (lote)</span>
 </div>
 
 <form method="post" id="form-lote">
@@ -19,19 +24,19 @@
                 <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
                 <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
             </svg>
-            <span>Dados comuns a todos os equipamentos</span>
+            <span>O que é igual para todos os equipamentos deste lote</span>
         </div>
 
         <div class="lote-campos-comuns">
             <div class="campo">
-                <label for="nome">Nome / Tipo</label>
+                <label for="nome">Nome / Tipo <span class="campo-obrigatorio">*</span></label>
                 <input type="text" id="nome" name="nome" required
                        value="{{ valores.nome }}"
                        placeholder="Ex.: Notebook Dell Latitude 5420">
             </div>
 
             <div class="campo">
-                <label for="categoria">Categoria</label>
+                <label for="categoria">Categoria <span class="campo-obrigatorio">*</span></label>
                 <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
                     <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
                     {% for c in categorias %}
@@ -45,7 +50,7 @@
             </div>
 
             <div class="campo">
-                <label for="tecnico_responsavel">Técnico responsável</label>
+                <label for="tecnico_responsavel">Técnico responsável <span class="campo-obrigatorio">*</span></label>
                 <input type="text" id="tecnico_responsavel" name="tecnico_responsavel"
                        list="lista-tecnicos" required
                        value="{{ valores.tecnico_responsavel }}"
@@ -58,7 +63,7 @@
             </div>
 
             <div class="campo">
-                <label for="status">Status</label>
+                <label for="status">Status <span class="campo-obrigatorio">*</span></label>
                 <select id="status" name="status" required>
                     {% for s in status_opcoes %}
                         <option value="{{ s }}" {{ 'selected' if s == valores.status else '' }}>{{ s }}</option>
@@ -75,6 +80,10 @@
                     {% endfor %}
                 </select>
             </div>
+        </div>
+        <div class="lote-campos-comuns-legenda">
+            Campos com <span class="campo-obrigatorio">*</span> são obrigatórios ·
+            {% for s in status_opcoes %}<strong>{{ s }}</strong>: {{ status_descricao(s) }}{{ ' · ' if not loop.last }}{% endfor %}
         </div>
     </div>
 

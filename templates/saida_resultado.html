@@ -6,8 +6,8 @@
     <div class="page-header-left">
         <h1>Resultado da saída</h1>
         <p class="page-subtitle">
-            {% if ticket %}Ticket <strong>{{ ticket }}</strong> · {% endif %}
-            Novo status: <strong>{{ status_novo }}</strong>
+            Status aplicado: <strong>{{ status_novo }}</strong>
+            {% if ticket %} · Ticket <strong>{{ ticket }}</strong>{% endif %}
         </p>
     </div>
 </div>
@@ -26,7 +26,7 @@
     {% endif %}
     <div class="resultado-card resultado-total">
         <span class="resultado-numero">{{ (encontrados|length) + (nao_encontrados|length) }}</span>
-        <span class="resultado-label">seriais processados</span>
+        <span class="resultado-label">no total</span>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
             <li class="resultado-item resultado-item-erro">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 <span class="resultado-serial">{{ serial }}</span>
-                <span class="resultado-hint">verifique se o serial está cadastrado</span>
+                <span class="resultado-hint">nenhum equipamento com este serial — confira a digitação ou cadastre-o primeiro</span>
             </li>
             {% endfor %}
         </ul>
@@ -81,7 +81,7 @@
 <div class="form-acoes" style="margin-top: 24px;">
     <a href="{{ url_for('equipamentos.saida') }}" class="btn btn-saida">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
-        Nova saída
+        Fazer nova atualização
     </a>
     <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Ver estoque</a>
 </div>

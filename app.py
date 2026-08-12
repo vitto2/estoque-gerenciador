@@ -4,7 +4,7 @@ from flask import Flask, redirect, render_template, url_for
 from flask_wtf import CSRFProtect
 
 from config import Config, DB_DIR
-from models import db
+from models import db, status_descricao
 
 csrf = CSRFProtect()
 
@@ -17,6 +17,7 @@ def create_app():
 
     db.init_app(app)
     csrf.init_app(app)
+    app.jinja_env.globals["status_descricao"] = status_descricao
 
     with app.app_context():
         db.create_all()

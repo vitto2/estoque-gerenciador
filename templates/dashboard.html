@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Estoque de TI{% endblock %}
+{% block title %}Painel — Estoque de TI{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div class="page-header-left">
-        <h1>Dashboard</h1>
-        <p class="page-subtitle">Visão geral do inventário de equipamentos</p>
+        <h1>Painel</h1>
+        <p class="page-subtitle">Um resumo geral do que está no seu estoque agora</p>
     </div>
 </div>
 
 {% if total_registros == 0 %}
 <div class="estado-vazio">
     <span class="estado-vazio-icon">📊</span>
-    <h3>Sem dados para exibir</h3>
-    <p>Cadastre equipamentos para visualizar as métricas e gráficos.</p>
+    <h3>Ainda não há nada para mostrar aqui</h3>
+    <p>Cadastre equipamentos para ver os números e gráficos do seu estoque.</p>
     <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
 </div>
 {% else %}
@@ -29,7 +29,7 @@
             </svg>
         </div>
         <span class="card-resumo-valor">{{ total_itens }}</span>
-        <span class="card-resumo-label">Total de itens</span>
+        <span class="card-resumo-label" title="Soma da quantidade de todos os equipamentos cadastrados">Unidades no estoque</span>
     </div>
 
     <div class="card-resumo">
@@ -41,7 +41,7 @@
             </svg>
         </div>
         <span class="card-resumo-valor">{{ total_registros }}</span>
-        <span class="card-resumo-label">Registros cadastrados</span>
+        <span class="card-resumo-label" title="Cada linha do estoque conta como 1 registro, mesmo que tenha várias unidades">Registros cadastrados</span>
     </div>
 
     {% for valor in status_valores %}
@@ -66,7 +66,7 @@
             {% endif %}
         </div>
         <span class="card-resumo-valor">{{ valor }}</span>
-        <span class="card-resumo-label">{{ status_labels[loop.index0] }}</span>
+        <span class="card-resumo-label" title="{{ status_descricao(status_labels[loop.index0]) }}">{{ status_labels[loop.index0] }}</span>
     </div>
     {% endfor %}
 
@@ -81,9 +81,9 @@
                     <rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/>
                 </svg>
             </div>
-            <h2>Quantidade por categoria</h2>
+            <h2>Unidades por categoria</h2>
         </div>
-        <canvas id="graficoCategoria"></canvas>
+        <div class="grafico-canvas-wrap"><canvas id="graficoCategoria"></canvas></div>
     </div>
 
     <div class="card-grafico">
@@ -93,9 +93,9 @@
                     <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 7.07 17.07"/>
                 </svg>
             </div>
-            <h2>Distribuição por status</h2>
+            <h2>Unidades por status</h2>
         </div>
-        <canvas id="graficoStatus"></canvas>
+        <div class="grafico-canvas-wrap"><canvas id="graficoStatus"></canvas></div>
     </div>
 
     <div class="card-grafico card-grafico-largo">
@@ -105,9 +105,9 @@
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                 </svg>
             </div>
-            <h2>Evolução de cadastros</h2>
+            <h2>Cadastros por dia</h2>
         </div>
-        <canvas id="graficoEvolucao"></canvas>
+        <div class="grafico-canvas-wrap"><canvas id="graficoEvolucao"></canvas></div>
     </div>
 </div>
 
@@ -151,6 +151,8 @@ new Chart(document.getElementById('graficoCategoria'), {
         }]
     },
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
             y: {
@@ -177,6 +179,8 @@ new Chart(document.getElementById('graficoStatus'), {
     },
     options: {
         cutout: '62%',
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'bottom',
@@ -209,6 +213,8 @@ new Chart(document.getElementById('graficoEvolucao'), {
         }]
     },
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
             y: {

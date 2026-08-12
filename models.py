@@ -53,6 +53,19 @@ def status_slug(status):
     return _STATUS_SLUGS.get(status, "outro")
 
 
+_STATUS_DESCRICOES = {
+    "Disponível": "Pronto para uso, ninguém está com ele agora",
+    "Em uso": "Alocado a alguém neste momento",
+    "Manutenção": "Em conserto ou revisão",
+    "Baixado": "Fora de uso — descartado ou removido do estoque",
+}
+
+
+def status_descricao(status):
+    """Explicação curta do status, usada em tooltips e legendas nos formulários."""
+    return _STATUS_DESCRICOES.get(status, "")
+
+
 class Equipamento(db.Model):
     __tablename__ = "equipamentos"
 
