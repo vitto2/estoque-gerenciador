@@ -1,5 +1,7 @@
 import os
 
+from sqlalchemy.pool import NullPool
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
 
@@ -15,7 +17,22 @@ def _database_url():
     return f"sqlite:///{os.path.join(DB_DIR, 'estoque.db')}"
 
 
+_DATABASE_URL = _database_url()
+_IS_POSTGRES = _DATABASE_URL.startswith("postgresql")
+
+
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "troque-esta-chave-em-producao")
-    SQLALCHEMY_DATABASE_URI = _database_url()
+    SQLALCHEMY_DATABASE_URI = _DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Cada invocação serverless é curta e isolada; sem um pool sobrevivendo
+    # entre requisições, o QueuePool padrão do SQLAlchemy tende a acumular
+    # conexões que nunca são fechadas e esgotam o limite do Postgres.
+    # NullPool abre e fecha a conexão a cada request, e pool_pre_ping evita
+    # erros por conexões que o servidor já derrubou por inatividade.
+    if _IS_POSTGRES:
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "poolclass": NullPool,
+            "pool_pre_ping": True,
+        }

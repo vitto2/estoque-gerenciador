@@ -10,6 +10,7 @@
 </div>
 
 <form method="post" id="form-saida">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="saida-layout">
 
         {# ── Painel lateral ─────────────────────────────────── #}

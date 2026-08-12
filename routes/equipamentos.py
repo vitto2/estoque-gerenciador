@@ -36,6 +36,7 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "categoria": form_data.get("categoria", ""),
             "categoria_customizada": form_data.get("categoria_customizada", ""),
             "quantidade": form_data.get("quantidade", ""),
+            "serial": form_data.get("serial", ""),
             "tecnico_responsavel": form_data.get("tecnico_responsavel", ""),
             "status": form_data.get("status", "Disponível"),
             "local_armazenamento": form_data.get("local_armazenamento", ""),
@@ -46,6 +47,7 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "categoria": equipamento.categoria,
             "categoria_customizada": "",
             "quantidade": equipamento.quantidade,
+            "serial": equipamento.serial or "",
             "tecnico_responsavel": equipamento.tecnico_responsavel,
             "status": equipamento.status,
             "local_armazenamento": equipamento.local_armazenamento or "",
@@ -55,14 +57,17 @@ def _valores_iniciais(equipamento=None, form_data=None):
         "categoria": "",
         "categoria_customizada": "",
         "quantidade": 1,
+        "serial": "",
         "tecnico_responsavel": "",
         "status": "Disponível",
         "local_armazenamento": "",
     }
 
 
-def _validar_dados(form):
-    """Valida os campos do formulário. Retorna (dados_prontos_pra_salvar, lista_de_erros)."""
+def _validar_dados(form, item_id=None):
+    """Valida os campos do formulário. Retorna (dados_prontos_pra_salvar, lista_de_erros).
+    `item_id` é o id do equipamento em edição (None em cadastros novos), usado para
+    não comparar o serial contra o próprio registro na checagem de duplicidade."""
     erros = []
 
     nome = (form.get("nome") or "").strip()
@@ -84,6 +89,14 @@ def _validar_dados(form):
     except (TypeError, ValueError):
         erros.append("Quantidade deve ser um número inteiro maior que zero.")
 
+    serial = (form.get("serial") or "").strip() or None
+    if serial:
+        duplicado = Equipamento.query.filter(db.func.lower(Equipamento.serial) == serial.lower())
+        if item_id is not None:
+            duplicado = duplicado.filter(Equipamento.id != item_id)
+        if duplicado.first():
+            erros.append(f'Já existe um equipamento cadastrado com o serial "{serial}".')
+
     tecnico = (form.get("tecnico_responsavel") or "").strip()
     if not tecnico:
         erros.append("Informe o técnico responsável.")
@@ -93,11 +106,14 @@ def _validar_dados(form):
         erros.append("Selecione um status válido.")
 
     local = (form.get("local_armazenamento") or "").strip() or None
+    if local and local not in LOCAIS_ARMAZENAMENTO:
+        erros.append("Selecione um local de armazenamento válido.")
 
     dados = {
         "nome": nome,
         "categoria": categoria,
         "quantidade": quantidade,
+        "serial": serial,
         "tecnico_responsavel": tecnico,
         "status": status,
         "local_armazenamento": local,
@@ -164,6 +180,8 @@ def lote():
         status = (request.form.get("status") or "").strip()
         seriais_raw = request.form.getlist("serial")
 
+        local = (request.form.get("local_armazenamento") or "").strip() or None
+
         erros = []
         if not nome:
             erros.append("Informe o nome/tipo do equipamento.")
@@ -173,17 +191,37 @@ def lote():
             erros.append("Informe o técnico responsável.")
         if status not in STATUS_OPCOES:
             erros.append("Selecione um status válido.")
+        if local and local not in LOCAIS_ARMAZENAMENTO:
+            erros.append("Selecione um local de armazenamento válido.")
 
         seriais = [s.strip() for s in seriais_raw if s.strip()]
         if not seriais:
             erros.append("Adicione pelo menos um número de série.")
+
+        vistos, duplicados_no_lote = set(), set()
+        for s in seriais:
+            chave = s.lower()
+            if chave in vistos:
+                duplicados_no_lote.add(s)
+            vistos.add(chave)
+        if duplicados_no_lote:
+            erros.append(f"Seriais repetidos nesta lista: {', '.join(sorted(duplicados_no_lote))}.")
+
+        if seriais and not duplicados_no_lote:
+            ja_cadastrados = (
+                Equipamento.query
+                .filter(db.func.lower(Equipamento.serial).in_([s.lower() for s in seriais]))
+                .all()
+            )
+            if ja_cadastrados:
+                nomes = sorted({e.serial for e in ja_cadastrados})
+                erros.append(f"Seriais já cadastrados no estoque: {', '.join(nomes)}.")
 
         if erros:
             for e in erros:
                 flash(e, "erro")
             return render_template("lote.html", **_contexto_lote(form_data=request.form, seriais=seriais_raw))
 
-        local = (request.form.get("local_armazenamento") or "").strip() or None
         for serial in seriais:
             db.session.add(Equipamento(
                 nome=nome,
@@ -293,7 +331,7 @@ def editar(item_id):
     item = Equipamento.query.get_or_404(item_id)
 
     if request.method == "POST":
-        dados, erros = _validar_dados(request.form)
+        dados, erros = _validar_dados(request.form, item_id=item.id)
         if erros:
             for e in erros:
                 flash(e, "erro")

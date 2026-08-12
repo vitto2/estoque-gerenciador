@@ -533,6 +533,7 @@ input:focus {
 }
 
 .campo-hint { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+.campo-opcional { color: var(--text-light); font-weight: 600; text-transform: none; }
 
 .form-acoes { display: flex; gap: 10px; margin-top: 6px; }
 

@@ -12,6 +12,7 @@
 </div>
 
 <form method="post" class="form-card" id="form-equipamento">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="form-card-header">
         <h2>
@@ -50,6 +51,14 @@
         <input type="number" id="quantidade" name="quantidade" min="1" step="1" required
                value="{{ valores.quantidade }}">
         <span class="campo-hint">Número de unidades deste item no estoque</span>
+    </div>
+
+    <div class="campo">
+        <label for="serial">Número de série <span class="campo-opcional">(opcional)</span></label>
+        <input type="text" id="serial" name="serial"
+               value="{{ valores.serial }}"
+               placeholder="Ex.: SN-DELL-5420-001"
+               autocomplete="off" spellcheck="false">
     </div>
 
     <div class="campo">

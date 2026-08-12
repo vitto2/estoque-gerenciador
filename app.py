@@ -1,9 +1,12 @@
 import os
 
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, render_template, url_for
+from flask_wtf import CSRFProtect
 
 from config import Config, DB_DIR
 from models import db
+
+csrf = CSRFProtect()
 
 
 def create_app():
@@ -13,6 +16,7 @@ def create_app():
     os.makedirs(DB_DIR, exist_ok=True)
 
     db.init_app(app)
+    csrf.init_app(app)
 
     with app.app_context():
         db.create_all()
@@ -26,6 +30,26 @@ def create_app():
     @app.route("/")
     def index():
         return redirect(url_for("equipamentos.listagem"))
+
+    @app.errorhandler(404)
+    def nao_encontrado(_erro):
+        return render_template("erro.html", codigo=404,
+                               titulo="Página não encontrada",
+                               mensagem="O link acessado não existe ou foi movido."), 404
+
+    @app.errorhandler(500)
+    def erro_interno(_erro):
+        return render_template("erro.html", codigo=500,
+                               titulo="Algo deu errado",
+                               mensagem="Ocorreu um erro inesperado. Tente novamente em alguns instantes."), 500
+
+    @app.after_request
+    def aplicar_headers_seguranca(resposta):
+        resposta.headers["X-Content-Type-Options"] = "nosniff"
+        resposta.headers["X-Frame-Options"] = "SAMEORIGIN"
+        resposta.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        resposta.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+        return resposta
 
     return app
 
