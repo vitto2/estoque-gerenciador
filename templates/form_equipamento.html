@@ -1,14 +1,31 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }} - Estoque de TI{% endblock %}
+{% block title %}{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }} — Estoque de TI{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }}</h1>
+    <div class="page-header-left">
+        <h1>{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }}</h1>
+        <p class="page-subtitle">
+            {{ 'Atualize as informações do equipamento abaixo' if equipamento else 'Preencha os dados para registrar um novo equipamento' }}
+        </p>
+    </div>
 </div>
 
 <form method="post" class="form-card" id="form-equipamento">
+
+    <div class="form-card-header">
+        <h2>
+            {% if equipamento %}
+            ✏️ Editando: {{ equipamento.nome }}
+            {% else %}
+            📦 Dados do equipamento
+            {% endif %}
+        </h2>
+        <p>Todos os campos marcados são obrigatórios</p>
+    </div>
+
     <div class="campo">
-        <label for="nome">Nome/Tipo do equipamento</label>
+        <label for="nome">Nome / Tipo do equipamento</label>
         <input type="text" id="nome" name="nome" required
                value="{{ valores.nome }}"
                placeholder="Ex.: Notebook Dell Latitude 5420">
@@ -17,28 +34,30 @@
     <div class="campo">
         <label for="categoria">Categoria</label>
         <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
-            <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
+            <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione uma categoria...</option>
             {% for c in categorias %}
                 <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
             {% endfor %}
         </select>
         <input type="text" id="categoria_customizada" name="categoria_customizada"
-               placeholder="Digite a nova categoria"
+               placeholder="Digite o nome da nova categoria"
                value="{{ valores.categoria_customizada }}"
-               style="display:none; margin-top:8px;">
+               style="display:none; margin-top:10px;">
     </div>
 
     <div class="campo">
         <label for="quantidade">Quantidade</label>
         <input type="number" id="quantidade" name="quantidade" min="1" step="1" required
                value="{{ valores.quantidade }}">
+        <span class="campo-hint">Número de unidades deste item no estoque</span>
     </div>
 
     <div class="campo">
         <label for="tecnico_responsavel">Técnico responsável</label>
-        <input type="text" id="tecnico_responsavel" name="tecnico_responsavel" list="lista-tecnicos" required
+        <input type="text" id="tecnico_responsavel" name="tecnico_responsavel"
+               list="lista-tecnicos" required
                value="{{ valores.tecnico_responsavel }}"
-               placeholder="Seu nome">
+               placeholder="Nome do técnico">
         <datalist id="lista-tecnicos">
             {% for t in tecnicos_existentes %}
                 <option value="{{ t }}">
@@ -56,7 +75,13 @@
     </div>
 
     <div class="form-acoes">
-        <button type="submit" class="btn btn-primary">{{ 'Salvar alterações' if equipamento else 'Cadastrar' }}</button>
+        <button type="submit" class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+            </svg>
+            {{ 'Salvar alterações' if equipamento else 'Cadastrar equipamento' }}
+        </button>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
     </div>
 </form>
@@ -68,6 +93,7 @@ function alternarCategoriaCustomizada() {
     if (select.value === 'Outro') {
         campoCustom.style.display = 'block';
         campoCustom.required = true;
+        campoCustom.focus();
     } else {
         campoCustom.style.display = 'none';
         campoCustom.required = false;

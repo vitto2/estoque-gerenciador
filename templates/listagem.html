@@ -1,10 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Estoque - Estoque de TI{% endblock %}
+{% block title %}Estoque — Estoque de TI{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Equipamentos em estoque</h1>
-    <span class="badge-count">{{ itens|length }} {{ 'item' if itens|length == 1 else 'itens' }}</span>
+    <div class="page-header-left">
+        <h1>Equipamentos em estoque</h1>
+        <p class="page-subtitle">Gerencie e consulte todos os equipamentos cadastrados</p>
+    </div>
+    <span class="badge-count">
+        {{ itens|length }} {{ 'item' if itens|length == 1 else 'itens' }}
+    </span>
 </div>
 
 <form method="get" class="filtros">
@@ -17,6 +22,7 @@
             {% endfor %}
         </select>
     </div>
+
     <div class="filtro-campo">
         <label for="status">Status</label>
         <select name="status" id="status">
@@ -26,6 +32,7 @@
             {% endfor %}
         </select>
     </div>
+
     <div class="filtro-campo">
         <label for="tecnico">Técnico</label>
         <select name="tecnico" id="tecnico">
@@ -35,11 +42,22 @@
             {% endfor %}
         </select>
     </div>
+
     <div class="filtro-acoes">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Filtrar
+        </button>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar</a>
         <a href="{{ url_for('equipamentos.exportar', categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}"
-           class="btn btn-exportar">⬇ Exportar Excel</a>
+           class="btn btn-exportar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exportar Excel
+        </a>
     </div>
 </form>
 
@@ -48,7 +66,7 @@
     <table class="tabela-estoque">
         <thead>
             <tr>
-                <th>Nome/Tipo</th>
+                <th>Nome / Tipo</th>
                 <th>Categoria</th>
                 <th>Qtd</th>
                 <th>Registrado em</th>
@@ -60,18 +78,30 @@
         <tbody>
             {% for item in itens %}
             <tr>
-                <td>{{ item.nome }}</td>
-                <td>{{ item.categoria }}</td>
-                <td>{{ item.quantidade }}</td>
-                <td>{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ item.tecnico_responsavel }}</td>
-                <td><span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span></td>
+                <td><span class="item-nome">{{ item.nome }}</span></td>
+                <td><span class="item-categoria">{{ item.categoria }}</span></td>
+                <td><span class="item-qtd">{{ item.quantidade }}</span></td>
+                <td><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>
+                <td><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
+                <td>
+                    <span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span>
+                </td>
                 <td class="acoes">
-                    <a href="{{ url_for('equipamentos.editar', item_id=item.id) }}" title="Editar">✏️</a>
+                    <a href="{{ url_for('equipamentos.editar', item_id=item.id) }}" title="Editar equipamento">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </a>
                     <form method="post" action="{{ url_for('equipamentos.excluir', item_id=item.id) }}"
                           class="form-excluir"
                           onsubmit="return confirm('Excluir \'{{ item.nome }}\'? Essa ação não pode ser desfeita.');">
-                        <button type="submit" title="Excluir">🗑️</button>
+                        <button type="submit" title="Excluir equipamento">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                            </svg>
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -81,8 +111,14 @@
 </div>
 {% else %}
 <div class="estado-vazio">
-    <p>Nenhum equipamento encontrado{{ ' com esses filtros' if filtro_categoria or filtro_status or filtro_tecnico else '' }}.</p>
-    <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar o primeiro equipamento</a>
+    <span class="estado-vazio-icon">📦</span>
+    <h3>Nenhum equipamento encontrado</h3>
+    <p>{{ 'Tente ajustar os filtros ou' if filtro_categoria or filtro_status or filtro_tecnico else 'Comece cadastrando' }} um novo equipamento no sistema.</p>
+    {% if filtro_categoria or filtro_status or filtro_tecnico %}
+        <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar filtros</a>
+    {% else %}
+        <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
+    {% endif %}
 </div>
 {% endif %}
 {% endblock %}

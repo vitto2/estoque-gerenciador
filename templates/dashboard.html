@@ -1,39 +1,112 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Estoque de TI{% endblock %}
+{% block title %}Dashboard — Estoque de TI{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Dashboard</h1>
+    <div class="page-header-left">
+        <h1>Dashboard</h1>
+        <p class="page-subtitle">Visão geral do inventário de equipamentos</p>
+    </div>
 </div>
 
 {% if total_registros == 0 %}
 <div class="estado-vazio">
-    <p>Ainda não há equipamentos cadastrados para gerar o dashboard.</p>
-    <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar o primeiro equipamento</a>
+    <span class="estado-vazio-icon">📊</span>
+    <h3>Sem dados para exibir</h3>
+    <p>Cadastre equipamentos para visualizar as métricas e gráficos.</p>
+    <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
 </div>
 {% else %}
+
+{# ── KPI Cards ── #}
 <div class="resumo-cards">
+
     <div class="card-resumo">
+        <div class="card-resumo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+            </svg>
+        </div>
         <span class="card-resumo-valor">{{ total_itens }}</span>
-        <span class="card-resumo-label">Itens em estoque</span>
+        <span class="card-resumo-label">Total de itens</span>
     </div>
+
     <div class="card-resumo">
+        <div class="card-resumo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+        </div>
         <span class="card-resumo-valor">{{ total_registros }}</span>
-        <span class="card-resumo-label">Equipamentos cadastrados</span>
+        <span class="card-resumo-label">Registros cadastrados</span>
     </div>
+
+    {% for valor in status_valores %}
+    <div class="card-resumo">
+        <div class="card-resumo-icon">
+            {% if loop.index0 == 0 %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            {% elif loop.index0 == 1 %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            {% elif loop.index0 == 2 %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+            {% else %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            </svg>
+            {% endif %}
+        </div>
+        <span class="card-resumo-valor">{{ valor }}</span>
+        <span class="card-resumo-label">{{ status_labels[loop.index0] }}</span>
+    </div>
+    {% endfor %}
+
 </div>
 
+{# ── Charts ── #}
 <div class="graficos-grid">
     <div class="card-grafico">
-        <h2>Quantidade total por categoria</h2>
+        <div class="card-grafico-header">
+            <div class="card-grafico-header-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/>
+                </svg>
+            </div>
+            <h2>Quantidade por categoria</h2>
+        </div>
         <canvas id="graficoCategoria"></canvas>
     </div>
+
     <div class="card-grafico">
-        <h2>Distribuição por status</h2>
+        <div class="card-grafico-header">
+            <div class="card-grafico-header-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 7.07 17.07"/>
+                </svg>
+            </div>
+            <h2>Distribuição por status</h2>
+        </div>
         <canvas id="graficoStatus"></canvas>
     </div>
+
     <div class="card-grafico card-grafico-largo">
-        <h2>Evolução de cadastros ao longo do tempo</h2>
+        <div class="card-grafico-header">
+            <div class="card-grafico-header-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <h2>Evolução de cadastros</h2>
+        </div>
         <canvas id="graficoEvolucao"></canvas>
     </div>
 </div>
@@ -41,25 +114,52 @@
 <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
 <script>
 const dadosCategoria = { labels: {{ categorias_labels|tojson }}, valores: {{ categorias_valores|tojson }} };
-const dadosStatus = { labels: {{ status_labels|tojson }}, valores: {{ status_valores|tojson }} };
-const dadosEvolucao = { labels: {{ evolucao_labels|tojson }}, valores: {{ evolucao_valores|tojson }} };
+const dadosStatus    = { labels: {{ status_labels|tojson }},    valores: {{ status_valores|tojson }}    };
+const dadosEvolucao  = { labels: {{ evolucao_labels|tojson }},  valores: {{ evolucao_valores|tojson }}  };
+
+// Mercado Livre palette
+const ML_BLUE   = '#3483FA';
+const ML_YELLOW = '#FFE600';
+const ML_GREEN  = '#00A650';
+const ML_ORANGE = '#FF7733';
+const ML_GRAY   = '#AAAAAA';
 
 const coresStatus = {
-    'Disponível': '#16A34A',
-    'Em uso': '#2563EB',
-    'Manutenção': '#D97706',
-    'Baixado': '#6B7280',
+    'Disponível': ML_GREEN,
+    'Em uso':     ML_BLUE,
+    'Manutenção': ML_ORANGE,
+    'Baixado':    ML_GRAY,
 };
+
+const gridColor = 'rgba(0,0,0,0.05)';
+const fontFamily = "'Nunito', -apple-system, sans-serif";
+
+Chart.defaults.font.family = fontFamily;
+Chart.defaults.color = '#999999';
 
 new Chart(document.getElementById('graficoCategoria'), {
     type: 'bar',
     data: {
         labels: dadosCategoria.labels,
-        datasets: [{ label: 'Quantidade', data: dadosCategoria.valores, backgroundColor: '#2D6CA3', borderRadius: 4 }]
+        datasets: [{
+            label: 'Quantidade',
+            data: dadosCategoria.valores,
+            backgroundColor: ML_BLUE,
+            hoverBackgroundColor: '#2968C8',
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
     },
     options: {
         plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { precision: 0, font: { weight: '700' } },
+                grid: { color: gridColor }
+            },
+            x: { grid: { display: false } }
+        }
     }
 });
 
@@ -67,9 +167,28 @@ new Chart(document.getElementById('graficoStatus'), {
     type: 'doughnut',
     data: {
         labels: dadosStatus.labels,
-        datasets: [{ data: dadosStatus.valores, backgroundColor: dadosStatus.labels.map(l => coresStatus[l] || '#9CA3AF') }]
+        datasets: [{
+            data: dadosStatus.valores,
+            backgroundColor: dadosStatus.labels.map(l => coresStatus[l] || ML_GRAY),
+            borderWidth: 3,
+            borderColor: '#FFFFFF',
+            hoverOffset: 6,
+        }]
     },
-    options: { plugins: { legend: { position: 'bottom' } } }
+    options: {
+        cutout: '62%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 16,
+                    usePointStyle: true,
+                    pointStyleWidth: 10,
+                    font: { weight: '700', size: 13 }
+                }
+            }
+        }
+    }
 });
 
 new Chart(document.getElementById('graficoEvolucao'), {
@@ -79,15 +198,26 @@ new Chart(document.getElementById('graficoEvolucao'), {
         datasets: [{
             label: 'Registros',
             data: dadosEvolucao.valores,
-            borderColor: '#2D6CA3',
-            backgroundColor: 'rgba(45, 108, 163, 0.15)',
-            tension: 0.25,
+            borderColor: ML_BLUE,
+            backgroundColor: 'rgba(52,131,250,0.10)',
+            borderWidth: 2.5,
+            pointBackgroundColor: ML_BLUE,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            tension: 0.35,
             fill: true,
         }]
     },
     options: {
         plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { precision: 0, font: { weight: '700' } },
+                grid: { color: gridColor }
+            },
+            x: { grid: { display: false } }
+        }
     }
 });
 </script>
