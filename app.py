@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, redirect, url_for
 
-from config import Config, INSTANCE_DIR
+from config import Config, DB_DIR
 from models import db
 
 
@@ -10,7 +10,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    os.makedirs(INSTANCE_DIR, exist_ok=True)
+    os.makedirs(DB_DIR, exist_ok=True)
 
     db.init_app(app)
 
@@ -30,6 +30,8 @@ def create_app():
     return app
 
 
+# Top-level instance required by Vercel's Python runtime
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True)
