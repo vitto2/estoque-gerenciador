@@ -5,6 +5,8 @@ request/response (mesmo padrão de exportacao.py).
 """
 import base64
 import json
+import sys
+import traceback
 
 from openai import OpenAI
 
@@ -56,6 +58,11 @@ def extrair_serial_da_imagem(conteudo_bytes, mimetype, api_key, model):
         )
         dados = json.loads(resposta.choices[0].message.content)
     except Exception as erro:
+        # Impresso em stderr pra aparecer nos Function Logs da Vercel — a causa mais
+        # comum é falta de crédito/billing configurado na conta da OpenAI (erro de
+        # "insufficient_quota"), que fica escondida atrás da mensagem genérica abaixo.
+        print(f"[extrair_serial] Falha na chamada à OpenAI: {erro!r}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         raise ExtracaoFalhou("Não consegui processar a imagem agora.") from erro
 
     serial = (dados.get("serial") or "").strip() or None

@@ -61,7 +61,7 @@
     </div>
 
     <div class="campo">
-        <label for="serial">Número de série <span id="marcador-serial" class="campo-opcional">(opcional)</span></label>
+        <label for="serial">Número de série <span id="marcador-serial"></span></label>
         <div class="campo-com-acao">
             <input type="text" id="serial" name="serial"
                    value="{{ valores.serial }}"
@@ -152,8 +152,8 @@ function atualizarObrigatoriedadeSerial() {
     const hint = document.getElementById('hint-extrair-serial');
 
     campoSerial.required = obrigatorio;
-    marcador.textContent = obrigatorio ? '*' : '(opcional)';
-    marcador.className = obrigatorio ? 'campo-obrigatorio' : 'campo-opcional';
+    marcador.textContent = obrigatorio ? '*' : '';
+    marcador.className = obrigatorio ? 'campo-obrigatorio' : '';
     hint.className = 'campo-hint';
     hint.textContent = obrigatorio
         ? 'Obrigatório para esta categoria · tire uma foto da etiqueta para preencher rápido'
