@@ -19,12 +19,24 @@ def _database_url():
 
 _DATABASE_URL = _database_url()
 _IS_POSTGRES = _DATABASE_URL.startswith("postgresql")
+_IS_VERCEL = bool(os.environ.get("VERCEL"))
 
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "troque-esta-chave-em-producao")
     SQLALCHEMY_DATABASE_URI = _DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Usados pra alertar na interface se o app subir em produção sem um
+    # banco persistente configurado (ver base.html) — foi exatamente isso
+    # que causou registros "desaparecendo" antes do DATABASE_URL ser
+    # configurado corretamente.
+    IS_POSTGRES = _IS_POSTGRES
+    IS_VERCEL = _IS_VERCEL
+
+    # Senha exigida para excluir um equipamento. Configurável via variável
+    # de ambiente pra poder trocar sem precisar alterar código.
+    SENHA_EXCLUSAO = os.environ.get("SENHA_EXCLUSAO", "meli2026")
 
     # Extração do número de série a partir de foto (Gemini Vision — camada
     # gratuita do Google AI Studio, sem cartão de crédito). Sem essa chave

@@ -389,6 +389,12 @@ def editar(item_id):
 @equipamentos_bp.route("/<int:item_id>/excluir", methods=["POST"])
 def excluir(item_id):
     item = Equipamento.query.get_or_404(item_id)
+
+    senha = (request.form.get("senha") or "").strip()
+    if senha != current_app.config.get("SENHA_EXCLUSAO"):
+        flash("Senha incorreta. Exclusão cancelada.", "erro")
+        return redirect(url_for("equipamentos.listagem"))
+
     nome = item.nome
     db.session.delete(item)
     db.session.commit()

@@ -119,8 +119,9 @@
                     </a>
                     <form method="post" action="{{ url_for('equipamentos.excluir', item_id=item.id) }}"
                           class="form-excluir"
-                          onsubmit="return confirm('Excluir \'{{ item.nome }}\'? Essa ação não pode ser desfeita.');">
+                          onsubmit="return confirmarExclusao(this, '{{ item.nome | e }}');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="senha" class="campo-senha-exclusao">
                         <button type="submit" title="Excluir equipamento">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -149,4 +150,17 @@
     {% endif %}
 </div>
 {% endif %}
+
+<script>
+function confirmarExclusao(form, nome) {
+    const senha = window.prompt('Para excluir "' + nome + '", digite a senha de confirmação:');
+    if (senha === null) return false;
+    if (!senha.trim()) {
+        alert('Você precisa digitar a senha para excluir.');
+        return false;
+    }
+    form.querySelector('.campo-senha-exclusao').value = senha;
+    return true;
+}
+</script>
 {% endblock %}

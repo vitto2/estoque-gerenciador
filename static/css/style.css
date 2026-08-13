@@ -299,6 +299,25 @@ a:hover { text-decoration: underline; }
 }
 .flash-erro .flash-icon { background: var(--ml-red); color: white; }
 
+/* ── ALERTA DE BANCO SEM PERSISTÊNCIA ────────────────────────────────────── */
+.alerta-banco {
+    background: repeating-linear-gradient(135deg, #7A0000, #7A0000 12px, #920000 12px, #920000 24px);
+    color: #FFFFFF;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+.alerta-banco svg { flex-shrink: 0; color: var(--amarelo-spark); }
+.alerta-banco strong { color: var(--amarelo-spark); }
+
 /* ── FILTERS BAR ─────────────────────────────────────────────────────────── */
 .filtros {
     display: flex;

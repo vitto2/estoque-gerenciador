@@ -20,6 +20,15 @@ def create_app():
     app.jinja_env.globals["status_descricao"] = status_descricao
     app.jinja_env.globals["status_slug"] = status_slug
 
+    @app.context_processor
+    def injetar_alerta_banco():
+        # Em produção (Vercel) sem DATABASE_URL configurada, o app cai pra
+        # SQLite efêmero — cada instância serverless tem seu próprio arquivo
+        # e os dados "somem" de forma imprevisível. Esse alerta aparece em
+        # toda página até a variável ser configurada corretamente.
+        sem_persistencia = app.config.get("IS_VERCEL") and not app.config.get("IS_POSTGRES")
+        return {"banco_sem_persistencia": sem_persistencia}
+
     with app.app_context():
         db.create_all()
 
