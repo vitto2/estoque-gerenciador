@@ -62,11 +62,20 @@
 
     <div class="campo">
         <label for="serial">Número de série <span class="campo-opcional">(opcional)</span></label>
-        <input type="text" id="serial" name="serial"
-               value="{{ valores.serial }}"
-               placeholder="Ex.: SN-DELL-5420-001"
-               autocomplete="off" spellcheck="false">
-        <span class="campo-hint">Preencha só se este equipamento tiver um número de série próprio</span>
+        <div class="campo-com-acao">
+            <input type="text" id="serial" name="serial"
+                   value="{{ valores.serial }}"
+                   placeholder="Ex.: SN-DELL-5420-001"
+                   autocomplete="off" spellcheck="false">
+            <button type="button" class="btn-extrair-foto" id="btn-extrair-serial" title="Extrair da foto da etiqueta">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </button>
+        </div>
+        <input type="file" id="input-foto-serial" accept="image/*" capture="environment" style="display:none">
+        <span class="campo-hint" id="hint-extrair-serial">Preencha só se este equipamento tiver um número de série próprio · ou tire uma foto da etiqueta</span>
     </div>
 
     <div class="campo">
@@ -118,6 +127,7 @@
     </div>
 </form>
 
+<script src="{{ url_for('static', filename='js/extrair-serial.js') }}"></script>
 <script>
 function alternarCategoriaCustomizada() {
     const select = document.getElementById('categoria');
@@ -132,5 +142,27 @@ function alternarCategoriaCustomizada() {
     }
 }
 document.addEventListener('DOMContentLoaded', alternarCategoriaCustomizada);
+
+ligarBotaoExtrairSerial(
+    document.getElementById('btn-extrair-serial'),
+    document.getElementById('input-foto-serial'),
+    "{{ url_for('equipamentos.extrair_serial') }}",
+    (resultado) => {
+        const hint = document.getElementById('hint-extrair-serial');
+        const campo = document.getElementById('serial');
+        if (resultado.status === 'carregando') {
+            hint.textContent = 'Lendo a etiqueta da foto...';
+        } else if (resultado.status === 'sucesso') {
+            campo.value = resultado.serial;
+            campo.focus();
+            campo.select();
+            hint.textContent = 'Extraído da foto — confira se está correto antes de salvar';
+        } else if (resultado.status === 'falha') {
+            hint.textContent = resultado.mensagem || 'Não encontrei o serial nessa foto. Tente de novo ou digite manualmente.';
+        } else {
+            hint.textContent = 'Erro ao enviar a foto. Verifique sua conexão e tente de novo.';
+        }
+    }
+);
 </script>
 {% endblock %}

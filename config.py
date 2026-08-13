@@ -26,6 +26,11 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Extração do número de série a partir de foto (OpenAI Vision).
+    # Sem essa chave configurada, o recurso fica desativado de forma graciosa.
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+    OPENAI_VISION_MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4o-mini")
+
     # Cada invocação serverless é curta e isolada; sem um pool sobrevivendo
     # entre requisições, o QueuePool padrão do SQLAlchemy tende a acumular
     # conexões que nunca são fechadas e esgotam o limite do Postgres.

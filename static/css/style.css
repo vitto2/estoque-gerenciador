@@ -535,6 +535,25 @@ input:focus {
 .campo-hint { font-size: 12px; color: var(--text-light); margin-top: 3px; }
 .campo-opcional { color: var(--text-light); font-weight: 600; text-transform: none; }
 
+.campo-com-acao { display: flex; gap: 8px; align-items: stretch; }
+.campo-com-acao input { flex: 1; min-width: 0; }
+
+.btn-extrair-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ml-blue);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+}
+.btn-extrair-foto:hover { background: var(--ml-blue-light); border-color: var(--ml-blue); }
+.btn-extrair-foto:disabled { opacity: 0.5; cursor: wait; }
+
 .form-acoes { display: flex; gap: 10px; margin-top: 6px; }
 
 /* ── DASHBOARD: KPI CARDS ────────────────────────────────────────────────── */
