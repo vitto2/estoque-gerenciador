@@ -127,6 +127,7 @@
     </div>
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script src="{{ url_for('static', filename='js/extrair-serial.js') }}"></script>
 <script>
 const CATEGORIAS_SERIAL_OBRIGATORIO = {{ categorias_serial_obrigatorio | tojson }};
@@ -168,13 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
 ligarBotaoExtrairSerial(
     document.getElementById('btn-extrair-serial'),
     document.getElementById('input-foto-serial'),
-    "{{ url_for('equipamentos.extrair_serial') }}",
     (resultado) => {
         const hint = document.getElementById('hint-extrair-serial');
         const campo = document.getElementById('serial');
         if (resultado.status === 'carregando') {
             hint.className = 'campo-hint';
-            hint.textContent = 'Lendo a etiqueta da foto...';
+            hint.textContent = 'Lendo a etiqueta da foto... (a primeira leitura pode demorar um pouco)';
         } else if (resultado.status === 'sucesso') {
             campo.value = resultado.serial;
             campo.focus();
