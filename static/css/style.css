@@ -553,6 +553,9 @@ input:focus {
 .acoes button:hover  { background: var(--ml-red-light);   color: var(--ml-red); }
 .form-excluir { display: inline; margin: 0; }
 
+/* Seta de expandir/recolher é só um recurso do cartão mobile */
+.btn-expandir-mobile { display: none; }
+
 /* ── EMPTY STATE ─────────────────────────────────────────────────────────── */
 .estado-vazio {
     background: var(--surface);
@@ -1300,6 +1303,43 @@ button:focus-visible,
         flex-shrink: 0;
     }
     .tabela-estoque td.col-mobile-oculta { display: none; }
+
+    /* Cartão compacto por padrão: só nome + seta. Detalhes (serial,
+       categoria, quantidade, local, técnico, status, ações) ficam
+       escondidos até o toque expandir a linha — evita que a lista fique
+       gigante quando há muitos equipamentos cadastrados. */
+    .tabela-estoque td.detalhe-mobile { display: none; }
+    .tabela-estoque tbody tr.expandido td.detalhe-mobile { display: flex; }
+
+    .tabela-estoque td.td-resumo-mobile {
+        border-bottom: none;
+        padding: 12px 0;
+    }
+    .tabela-estoque td.td-resumo-mobile::before { content: none; }
+    .tabela-estoque tbody tr.expandido td.td-resumo-mobile {
+        border-bottom: 1px solid #F2F2F2;
+    }
+    .tabela-estoque td.td-resumo-mobile .item-nome { font-size: 15px; }
+
+    .btn-expandir-mobile {
+        display: flex;
+        background: var(--neutral-bg);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+        cursor: pointer;
+        padding: 0;
+        transition: background var(--transition), transform var(--transition);
+    }
+    .btn-expandir-mobile:active { transform: scale(0.92); }
+    .seta-expandir { transition: transform 0.2s ease; }
+    .tabela-estoque tbody tr.expandido .seta-expandir { transform: rotate(180deg); }
+
     .tabela-estoque td.col-acoes-mobile {
         justify-content: center;
         gap: 20px;

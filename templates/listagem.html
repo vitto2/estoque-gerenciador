@@ -81,8 +81,15 @@
         <tbody>
             {% for item in itens %}
             <tr data-status="{{ item.status_slug }}">
-                <td data-label="Nome / Tipo"><span class="item-nome">{{ item.nome }}</span></td>
-                <td data-label="Serial">
+                <td data-label="Nome / Tipo" class="td-resumo-mobile">
+                    <span class="item-nome">{{ item.nome }}</span>
+                    <button type="button" class="btn-expandir-mobile" onclick="alternarDetalhesEquipamento(this)" aria-label="Ver detalhes">
+                        <svg class="seta-expandir" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </td>
+                <td data-label="Serial" class="detalhe-mobile">
                     {% if item.serial %}
                         <span class="item-serial">{{ item.serial }}</span>
                     {% else %}
@@ -96,21 +103,21 @@
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td data-label="Categoria"><span class="item-categoria">{{ item.categoria }}</span></td>
-                <td data-label="Quantidade"><span class="item-qtd">{{ item.quantidade }}</span></td>
+                <td data-label="Categoria" class="detalhe-mobile"><span class="item-categoria">{{ item.categoria }}</span></td>
+                <td data-label="Quantidade" class="detalhe-mobile"><span class="item-qtd">{{ item.quantidade }}</span></td>
                 <td data-label="Registrado em" class="col-mobile-oculta"><span class="item-data">{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}</span></td>
-                <td data-label="Local">
+                <td data-label="Local" class="detalhe-mobile">
                     {% if item.local_armazenamento %}
                         <span class="item-local">{{ item.local_armazenamento }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td data-label="Técnico"><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
-                <td data-label="Status">
+                <td data-label="Técnico" class="detalhe-mobile"><span class="item-tecnico">{{ item.tecnico_responsavel }}</span></td>
+                <td data-label="Status" class="detalhe-mobile">
                     <span class="status-badge status-{{ item.status_slug }}" title="{{ status_descricao(item.status) }}">{{ item.status }}</span>
                 </td>
-                <td class="acoes col-acoes-mobile">
+                <td class="acoes col-acoes-mobile detalhe-mobile">
                     <a href="{{ url_for('equipamentos.editar', item_id=item.id) }}" title="Editar equipamento">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -152,6 +159,11 @@
 {% endif %}
 
 <script>
+function alternarDetalhesEquipamento(botao) {
+    const linha = botao.closest('tr');
+    linha.classList.toggle('expandido');
+}
+
 function confirmarExclusao(form, nome) {
     const senha = window.prompt('Para excluir "' + nome + '", digite a senha de confirmação:');
     if (senha === null) return false;
