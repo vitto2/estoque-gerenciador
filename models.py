@@ -27,6 +27,18 @@ CATEGORIAS = [
 # "Outro" não entra nessa lista: é só uma opção de formulário que libera um
 # campo de texto livre (routes/equipamentos.py). Nunca é um valor salvo no banco.
 
+# Categorias em que o equipamento normalmente vem com serial de fábrica —
+# nessas, o campo "Número de série" passa a ser obrigatório no cadastro.
+# Periférico, Cabo e categorias customizadas ("Outro") continuam opcionais,
+# pois nem sempre têm um serial de fato.
+CATEGORIAS_COM_SERIAL_OBRIGATORIO = [
+    "Notebook",
+    "Monitor",
+    "Impressora",
+    "Coletor de Dados",
+    "Leitor/Scanner",
+]
+
 STATUS_OPCOES = [
     "Disponível",
     "Em uso",

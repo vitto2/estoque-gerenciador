@@ -6,7 +6,10 @@ from flask import (
 
 from exportacao import gerar_planilha_equipamentos
 from extracao_serial import ExtracaoFalhou, ExtracaoIndisponivel, extrair_serial_da_imagem
-from models import CATEGORIAS, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES, Equipamento, db, status_slug
+from models import (
+    CATEGORIAS, CATEGORIAS_COM_SERIAL_OBRIGATORIO, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES,
+    Equipamento, db, status_slug,
+)
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
 
@@ -93,6 +96,8 @@ def _validar_dados(form, item_id=None):
         erros.append("Quantidade deve ser um número inteiro maior que zero.")
 
     serial = (form.get("serial") or "").strip() or None
+    if not serial and categoria in CATEGORIAS_COM_SERIAL_OBRIGATORIO:
+        erros.append(f'Informe o número de série — obrigatório para a categoria "{categoria}".')
     if serial:
         duplicado = Equipamento.query.filter(db.func.lower(Equipamento.serial) == serial.lower())
         if item_id is not None:
@@ -131,6 +136,7 @@ def _contexto_form(equipamento=None, form_data=None):
         "categorias": get_categorias_disponiveis() + ["Outro"],
         "status_opcoes": STATUS_OPCOES,
         "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
+        "categorias_serial_obrigatorio": CATEGORIAS_COM_SERIAL_OBRIGATORIO,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
 

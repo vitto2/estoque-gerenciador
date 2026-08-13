@@ -533,6 +533,8 @@ input:focus {
 }
 
 .campo-hint { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+.campo-hint-erro { color: var(--ml-red); font-weight: 700; }
+.campo-hint-sucesso { color: var(--ml-green); font-weight: 700; }
 .campo-opcional { color: var(--text-light); font-weight: 600; text-transform: none; }
 
 .campo-com-acao { display: flex; gap: 8px; align-items: stretch; }

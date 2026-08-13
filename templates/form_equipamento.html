@@ -41,7 +41,7 @@
 
     <div class="campo">
         <label for="categoria">Categoria <span class="campo-obrigatorio">*</span></label>
-        <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
+        <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada(); atualizarObrigatoriedadeSerial();">
             <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione uma categoria...</option>
             {% for c in categorias %}
                 <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
@@ -61,7 +61,7 @@
     </div>
 
     <div class="campo">
-        <label for="serial">Número de série <span class="campo-opcional">(opcional)</span></label>
+        <label for="serial">Número de série <span id="marcador-serial" class="campo-opcional">(opcional)</span></label>
         <div class="campo-com-acao">
             <input type="text" id="serial" name="serial"
                    value="{{ valores.serial }}"
@@ -129,6 +129,8 @@
 
 <script src="{{ url_for('static', filename='js/extrair-serial.js') }}"></script>
 <script>
+const CATEGORIAS_SERIAL_OBRIGATORIO = {{ categorias_serial_obrigatorio | tojson }};
+
 function alternarCategoriaCustomizada() {
     const select = document.getElementById('categoria');
     const campoCustom = document.getElementById('categoria_customizada');
@@ -141,7 +143,27 @@ function alternarCategoriaCustomizada() {
         campoCustom.required = false;
     }
 }
-document.addEventListener('DOMContentLoaded', alternarCategoriaCustomizada);
+
+function atualizarObrigatoriedadeSerial() {
+    const categoria = document.getElementById('categoria').value;
+    const obrigatorio = CATEGORIAS_SERIAL_OBRIGATORIO.includes(categoria);
+    const campoSerial = document.getElementById('serial');
+    const marcador = document.getElementById('marcador-serial');
+    const hint = document.getElementById('hint-extrair-serial');
+
+    campoSerial.required = obrigatorio;
+    marcador.textContent = obrigatorio ? '*' : '(opcional)';
+    marcador.className = obrigatorio ? 'campo-obrigatorio' : 'campo-opcional';
+    hint.className = 'campo-hint';
+    hint.textContent = obrigatorio
+        ? 'Obrigatório para esta categoria · tire uma foto da etiqueta para preencher rápido'
+        : 'Preencha só se este equipamento tiver um número de série próprio · ou tire uma foto da etiqueta';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    alternarCategoriaCustomizada();
+    atualizarObrigatoriedadeSerial();
+});
 
 ligarBotaoExtrairSerial(
     document.getElementById('btn-extrair-serial'),
@@ -151,16 +173,20 @@ ligarBotaoExtrairSerial(
         const hint = document.getElementById('hint-extrair-serial');
         const campo = document.getElementById('serial');
         if (resultado.status === 'carregando') {
+            hint.className = 'campo-hint';
             hint.textContent = 'Lendo a etiqueta da foto...';
         } else if (resultado.status === 'sucesso') {
             campo.value = resultado.serial;
             campo.focus();
             campo.select();
-            hint.textContent = 'Extraído da foto — confira se está correto antes de salvar';
+            hint.className = 'campo-hint campo-hint-sucesso';
+            hint.textContent = '✓ Extraído da foto — confira se está correto antes de salvar';
         } else if (resultado.status === 'falha') {
-            hint.textContent = resultado.mensagem || 'Não encontrei o serial nessa foto. Tente de novo ou digite manualmente.';
+            hint.className = 'campo-hint campo-hint-erro';
+            hint.textContent = '⚠ ' + (resultado.mensagem || 'Não encontrei o serial nessa foto. Tente de novo ou digite manualmente.');
         } else {
-            hint.textContent = 'Erro ao enviar a foto. Verifique sua conexão e tente de novo.';
+            hint.className = 'campo-hint campo-hint-erro';
+            hint.textContent = '⚠ Erro ao enviar a foto. Verifique sua conexão e tente de novo.';
         }
     }
 );
