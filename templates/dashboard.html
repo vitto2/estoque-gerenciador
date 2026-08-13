@@ -19,6 +19,8 @@
 {% else %}
 
 {# ── KPI Cards ── #}
+<div class="painel-hero">
+<p class="painel-hero-titulo">Visão geral</p>
 <div class="resumo-cards">
 
     <div class="card-resumo">
@@ -45,7 +47,7 @@
     </div>
 
     {% for valor in status_valores %}
-    <div class="card-resumo">
+    <div class="card-resumo" data-status="{{ status_slug(status_labels[loop.index0]) }}">
         <div class="card-resumo-icon">
             {% if loop.index0 == 0 %}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,6 +72,7 @@
     </div>
     {% endfor %}
 
+</div>
 </div>
 
 {# ── Charts ── #}
@@ -131,8 +134,8 @@ const coresStatus = {
     'Baixado':    ML_GRAY,
 };
 
-const gridColor = 'rgba(0,0,0,0.05)';
-const fontFamily = "'Nunito', -apple-system, sans-serif";
+const gridColor = 'rgba(15,42,92,0.06)';
+const fontFamily = "'Inter', -apple-system, sans-serif";
 
 Chart.defaults.font.family = fontFamily;
 Chart.defaults.color = '#999999';

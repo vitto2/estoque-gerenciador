@@ -147,7 +147,7 @@
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                 <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
             </svg>
-            Cadastrar <span id="btn-count">{{ seriais|length }}</span> equipamento<span id="btn-plural">{{ 's' if seriais|length != 1 else '' }}</span>
+            Cadastrar <span id="btn-count">{{ seriais|length }}</span> <span id="btn-unidade">{{ 'equipamento' if seriais|length == 1 else 'equipamentos' }}</span>
         </button>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
     </div>
@@ -160,7 +160,7 @@ function atualizarContador() {
     const n = rows.length;
     document.getElementById('lote-contador').textContent = n;
     document.getElementById('btn-count').textContent = n;
-    document.getElementById('btn-plural').textContent = n === 1 ? '' : 's';
+    document.getElementById('btn-unidade').textContent = n === 1 ? 'equipamento' : 'equipamentos';
 }
 
 function atualizarNumeracao() {

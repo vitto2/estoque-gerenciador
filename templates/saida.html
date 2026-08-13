@@ -91,7 +91,7 @@ SN-HP-840-015"
                 <polyline points="14 2 14 8 20 8"/>
                 <line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/>
             </svg>
-            Atualizar <span id="btn-count">0</span> equipamento<span id="btn-plural"></span>
+            Atualizar <span id="btn-count">0</span> <span id="btn-unidade">equipamentos</span>
         </button>
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
     </div>
@@ -101,13 +101,13 @@ SN-HP-840-015"
 const textarea = document.getElementById('seriais_texto');
 const contador = document.getElementById('saida-contador');
 const btnCount = document.getElementById('btn-count');
-const btnPlural = document.getElementById('btn-plural');
+const btnUnidade = document.getElementById('btn-unidade');
 
 function contarSeriais() {
     const n = textarea.value.split('\n').filter(l => l.trim()).length;
     contador.textContent = n;
     btnCount.textContent = n;
-    btnPlural.textContent = n === 1 ? '' : 's';
+    btnUnidade.textContent = n === 1 ? 'equipamento' : 'equipamentos';
     return n;
 }
 

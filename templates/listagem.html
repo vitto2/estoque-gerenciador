@@ -80,7 +80,7 @@
         </thead>
         <tbody>
             {% for item in itens %}
-            <tr>
+            <tr data-status="{{ item.status_slug }}">
                 <td data-label="Nome / Tipo"><span class="item-nome">{{ item.nome }}</span></td>
                 <td data-label="Serial">
                     {% if item.serial %}
