@@ -1,8 +1,11 @@
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
+from flask import (
+    Blueprint, current_app, flash, jsonify, redirect, render_template, request, send_file, url_for,
+)
 
 from exportacao import gerar_planilha_equipamentos
+from extracao_serial import ExtracaoFalhou, ExtracaoIndisponivel, extrair_serial_da_imagem
 from models import (
     CATEGORIAS, CATEGORIAS_COM_SERIAL_OBRIGATORIO, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES,
     Equipamento, db, status_slug,
@@ -173,6 +176,34 @@ def _contexto_lote(form_data=None, seriais=None):
         "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
+
+
+@equipamentos_bp.route("/extrair-serial", methods=["POST"])
+def extrair_serial():
+    foto = request.files.get("foto")
+    if not foto or not foto.mimetype or not foto.mimetype.startswith("image/"):
+        return jsonify({"erro": "Envie uma imagem válida."}), 400
+
+    conteudo = foto.read()
+
+    try:
+        serial = extrair_serial_da_imagem(
+            conteudo,
+            foto.mimetype,
+            current_app.config.get("GEMINI_API_KEY"),
+            current_app.config.get("GEMINI_VISION_MODEL"),
+        )
+    except ExtracaoIndisponivel as erro:
+        return jsonify({"erro": str(erro)}), 503
+    except ValueError as erro:
+        return jsonify({"erro": str(erro)}), 400
+    except ExtracaoFalhou as erro:
+        return jsonify({"erro": str(erro)}), 502
+
+    if not serial:
+        return jsonify({"serial": None, "mensagem": "Não encontrei um número de série legível nessa foto."})
+
+    return jsonify({"serial": serial})
 
 
 @equipamentos_bp.route("/lote", methods=["GET", "POST"])

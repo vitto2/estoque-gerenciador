@@ -26,6 +26,15 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Extração do número de série a partir de foto (Gemini Vision — camada
+    # gratuita do Google AI Studio, sem cartão de crédito). Sem essa chave
+    # configurada, o recurso fica desativado de forma graciosa.
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+    # "-latest" é um alias mantido pela Google sempre apontando para o modelo
+    # flash atual — evita que o app pare de funcionar quando uma versão
+    # específica (ex.: gemini-2.5-flash) for descontinuada para novas contas.
+    GEMINI_VISION_MODEL = os.environ.get("GEMINI_VISION_MODEL", "gemini-flash-latest")
+
     # Cada invocação serverless é curta e isolada; sem um pool sobrevivendo
     # entre requisições, o QueuePool padrão do SQLAlchemy tende a acumular
     # conexões que nunca são fechadas e esgotam o limite do Postgres.
