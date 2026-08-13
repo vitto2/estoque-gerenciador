@@ -38,9 +38,9 @@
     --sombra-lg: 0 16px 40px rgba(15,42,92,0.18), 0 4px 12px rgba(15,42,92,0.08);
     --transicao: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --fonte-display: "Space Grotesk", -apple-system, sans-serif;
-    --fonte-corpo:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --fonte-dados:    "JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace;
+    --fonte-display: "IBM Plex Sans", -apple-system, sans-serif;
+    --fonte-corpo:    "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --fonte-dados:    "IBM Plex Mono", "SF Mono", "Fira Code", Consolas, monospace;
 
     /* Aliases — mantêm o restante da folha funcionando sem precisar
        trocar cada seletor um a um. */
