@@ -29,10 +29,17 @@
 
         <div class="lote-campos-comuns">
             <div class="campo">
-                <label for="nome">Nome / Tipo <span class="campo-obrigatorio">*</span></label>
-                <input type="text" id="nome" name="nome" required
-                       value="{{ valores.nome }}"
-                       placeholder="Ex.: Notebook Dell Latitude 5420">
+                <label for="fabricante">Fabricante <span class="campo-obrigatorio">*</span></label>
+                <input type="text" id="fabricante" name="fabricante" required
+                       value="{{ valores.fabricante }}"
+                       placeholder="Ex.: Dell">
+            </div>
+
+            <div class="campo">
+                <label for="modelo">Modelo <span class="campo-obrigatorio">*</span></label>
+                <input type="text" id="modelo" name="modelo" required
+                       value="{{ valores.modelo }}"
+                       placeholder="Ex.: Latitude 5420">
             </div>
 
             <div class="campo">
@@ -79,6 +86,22 @@
                         <option value="{{ l }}" {{ 'selected' if l == valores.local_armazenamento else '' }}>{{ l }}</option>
                     {% endfor %}
                 </select>
+            </div>
+
+            <div class="campo">
+                <label for="status_arturito">Status no Arturito <span class="campo-opcional">(opcional)</span></label>
+                <select id="status_arturito" name="status_arturito">
+                    <option value="">Não informado</option>
+                    {% for s in status_arturito_opcoes %}
+                        <option value="{{ s }}" {{ 'selected' if s == valores.status_arturito else '' }}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="observacoes">Observações <span class="campo-opcional">(opcional)</span></label>
+                <textarea id="observacoes" name="observacoes" rows="2"
+                          placeholder="Ex.: número do ticket do Jira, detalhes do lote, etc.">{{ valores.observacoes }}</textarea>
             </div>
         </div>
         <div class="lote-campos-comuns-legenda">

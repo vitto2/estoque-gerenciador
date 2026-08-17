@@ -52,6 +52,13 @@ LOCAIS_ARMAZENAMENTO = [
     "Estoque TI G200",
 ]
 
+# Reflete se o cadastro deste equipamento no Arturito (sistema interno usado
+# pelo time) já foi conferido/atualizado ou ainda está pendente.
+STATUS_ARTURITO_OPCOES = [
+    "Atualizado",
+    "Pendente de verificação",
+]
+
 _STATUS_SLUGS = {
     "Disponível": "disponivel",
     "Em uso": "em-uso",
@@ -82,18 +89,20 @@ class Equipamento(db.Model):
     __tablename__ = "equipamentos"
 
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(150), nullable=False)
+    fabricante = db.Column(db.String(100), nullable=False)
+    modelo = db.Column(db.String(100), nullable=False)
     categoria = db.Column(db.String(50), nullable=False)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     serial = db.Column(db.String(100), nullable=True)
     local_armazenamento = db.Column(db.String(50), nullable=True)
-    ticket_jira = db.Column(db.String(50), nullable=True)
+    observacoes = db.Column(db.Text, nullable=True)
+    status_arturito = db.Column(db.String(30), nullable=True)
     data_registro = db.Column(db.DateTime, nullable=False, default=datetime.now)
     tecnico_responsavel = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="Disponível")
 
     def __repr__(self):
-        return f"<Equipamento {self.id} {self.nome} ({self.categoria}) - {self.status}>"
+        return f"<Equipamento {self.id} {self.fabricante} {self.modelo} ({self.categoria}) - {self.status}>"
 
     @property
     def status_slug(self):
@@ -104,7 +113,8 @@ class Equipamento(db.Model):
         """Serialização usada pelas rotas do dashboard."""
         return {
             "id": self.id,
-            "nome": self.nome,
+            "fabricante": self.fabricante,
+            "modelo": self.modelo,
             "categoria": self.categoria,
             "quantidade": self.quantidade,
             "data_registro": self.data_registro.strftime("%d/%m/%Y %H:%M"),

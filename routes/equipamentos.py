@@ -7,8 +7,8 @@ from flask import (
 from exportacao import gerar_planilha_equipamentos
 from extracao_serial import ExtracaoFalhou, ExtracaoIndisponivel, extrair_serial_da_imagem
 from models import (
-    CATEGORIAS, CATEGORIAS_COM_SERIAL_OBRIGATORIO, LOCAIS_ARMAZENAMENTO, STATUS_OPCOES,
-    Equipamento, db, status_slug,
+    CATEGORIAS, CATEGORIAS_COM_SERIAL_OBRIGATORIO, LOCAIS_ARMAZENAMENTO, STATUS_ARTURITO_OPCOES,
+    STATUS_OPCOES, Equipamento, db, status_slug,
 )
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
@@ -38,7 +38,8 @@ def _valores_iniciais(equipamento=None, form_data=None):
     (modo edição), e por último aos valores em branco (modo cadastro)."""
     if form_data is not None:
         return {
-            "nome": form_data.get("nome", ""),
+            "fabricante": form_data.get("fabricante", ""),
+            "modelo": form_data.get("modelo", ""),
             "categoria": form_data.get("categoria", ""),
             "categoria_customizada": form_data.get("categoria_customizada", ""),
             "quantidade": form_data.get("quantidade", ""),
@@ -46,10 +47,13 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "tecnico_responsavel": form_data.get("tecnico_responsavel", ""),
             "status": form_data.get("status", "Disponível"),
             "local_armazenamento": form_data.get("local_armazenamento", ""),
+            "observacoes": form_data.get("observacoes", ""),
+            "status_arturito": form_data.get("status_arturito", ""),
         }
     if equipamento is not None:
         return {
-            "nome": equipamento.nome,
+            "fabricante": equipamento.fabricante,
+            "modelo": equipamento.modelo,
             "categoria": equipamento.categoria,
             "categoria_customizada": "",
             "quantidade": equipamento.quantidade,
@@ -57,9 +61,12 @@ def _valores_iniciais(equipamento=None, form_data=None):
             "tecnico_responsavel": equipamento.tecnico_responsavel,
             "status": equipamento.status,
             "local_armazenamento": equipamento.local_armazenamento or "",
+            "observacoes": equipamento.observacoes or "",
+            "status_arturito": equipamento.status_arturito or "",
         }
     return {
-        "nome": "",
+        "fabricante": "",
+        "modelo": "",
         "categoria": "",
         "categoria_customizada": "",
         "quantidade": 1,
@@ -67,6 +74,8 @@ def _valores_iniciais(equipamento=None, form_data=None):
         "tecnico_responsavel": "",
         "status": "Disponível",
         "local_armazenamento": "",
+        "observacoes": "",
+        "status_arturito": "",
     }
 
 
@@ -76,9 +85,13 @@ def _validar_dados(form, item_id=None):
     não comparar o serial contra o próprio registro na checagem de duplicidade."""
     erros = []
 
-    nome = (form.get("nome") or "").strip()
-    if not nome:
-        erros.append("Informe o nome/tipo do equipamento.")
+    fabricante = (form.get("fabricante") or "").strip()
+    if not fabricante:
+        erros.append("Informe o fabricante do equipamento.")
+
+    modelo = (form.get("modelo") or "").strip()
+    if not modelo:
+        erros.append("Informe o modelo do equipamento.")
 
     categoria = (form.get("categoria") or "").strip()
     if categoria == "Outro":
@@ -117,14 +130,23 @@ def _validar_dados(form, item_id=None):
     if local and local not in LOCAIS_ARMAZENAMENTO:
         erros.append("Selecione um local de armazenamento válido.")
 
+    observacoes = (form.get("observacoes") or "").strip() or None
+
+    status_arturito = (form.get("status_arturito") or "").strip() or None
+    if status_arturito and status_arturito not in STATUS_ARTURITO_OPCOES:
+        erros.append("Selecione um status do Arturito válido.")
+
     dados = {
-        "nome": nome,
+        "fabricante": fabricante,
+        "modelo": modelo,
         "categoria": categoria,
         "quantidade": quantidade,
         "serial": serial,
         "tecnico_responsavel": tecnico,
         "status": status,
         "local_armazenamento": local,
+        "observacoes": observacoes,
+        "status_arturito": status_arturito,
     }
     return dados, erros
 
@@ -136,6 +158,7 @@ def _contexto_form(equipamento=None, form_data=None):
         "categorias": get_categorias_disponiveis() + ["Outro"],
         "status_opcoes": STATUS_OPCOES,
         "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
+        "status_arturito_opcoes": STATUS_ARTURITO_OPCOES,
         "categorias_serial_obrigatorio": CATEGORIAS_COM_SERIAL_OBRIGATORIO,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
@@ -163,17 +186,21 @@ def _contexto_lote(form_data=None, seriais=None):
     fd = form_data or {}
     return {
         "valores": {
-            "nome": fd.get("nome", ""),
+            "fabricante": fd.get("fabricante", ""),
+            "modelo": fd.get("modelo", ""),
             "categoria": fd.get("categoria", ""),
             "categoria_customizada": fd.get("categoria_customizada", ""),
             "tecnico_responsavel": fd.get("tecnico_responsavel", ""),
             "status": fd.get("status", "Disponível"),
             "local_armazenamento": fd.get("local_armazenamento", ""),
+            "observacoes": fd.get("observacoes", ""),
+            "status_arturito": fd.get("status_arturito", ""),
         },
         "seriais": seriais if seriais is not None else [""],
         "categorias": get_categorias_disponiveis() + ["Outro"],
         "status_opcoes": STATUS_OPCOES,
         "locais_armazenamento": LOCAIS_ARMAZENAMENTO,
+        "status_arturito_opcoes": STATUS_ARTURITO_OPCOES,
         "tecnicos_existentes": get_tecnicos_existentes(),
     }
 
@@ -209,7 +236,8 @@ def extrair_serial():
 @equipamentos_bp.route("/lote", methods=["GET", "POST"])
 def lote():
     if request.method == "POST":
-        nome = (request.form.get("nome") or "").strip()
+        fabricante = (request.form.get("fabricante") or "").strip()
+        modelo = (request.form.get("modelo") or "").strip()
         categoria = (request.form.get("categoria") or "").strip()
         if categoria == "Outro":
             categoria = (request.form.get("categoria_customizada") or "").strip()
@@ -218,10 +246,14 @@ def lote():
         seriais_raw = request.form.getlist("serial")
 
         local = (request.form.get("local_armazenamento") or "").strip() or None
+        observacoes = (request.form.get("observacoes") or "").strip() or None
+        status_arturito = (request.form.get("status_arturito") or "").strip() or None
 
         erros = []
-        if not nome:
-            erros.append("Informe o nome/tipo do equipamento.")
+        if not fabricante:
+            erros.append("Informe o fabricante do equipamento.")
+        if not modelo:
+            erros.append("Informe o modelo do equipamento.")
         if not categoria:
             erros.append("Informe a categoria.")
         if not tecnico:
@@ -230,6 +262,8 @@ def lote():
             erros.append("Selecione um status válido.")
         if local and local not in LOCAIS_ARMAZENAMENTO:
             erros.append("Selecione um local de armazenamento válido.")
+        if status_arturito and status_arturito not in STATUS_ARTURITO_OPCOES:
+            erros.append("Selecione um status do Arturito válido.")
 
         seriais = [s.strip() for s in seriais_raw if s.strip()]
         if not seriais:
@@ -261,11 +295,14 @@ def lote():
 
         for serial in seriais:
             db.session.add(Equipamento(
-                nome=nome,
+                fabricante=fabricante,
+                modelo=modelo,
                 categoria=categoria,
                 quantidade=1,
                 serial=serial,
                 local_armazenamento=local,
+                observacoes=observacoes,
+                status_arturito=status_arturito,
                 tecnico_responsavel=tecnico,
                 status=status,
             ))
@@ -280,7 +317,7 @@ def lote():
 @equipamentos_bp.route("/saida", methods=["GET", "POST"])
 def saida():
     if request.method == "POST":
-        ticket = (request.form.get("ticket_jira") or "").strip() or None
+        observacao = (request.form.get("observacoes") or "").strip() or None
         status_novo = (request.form.get("status") or "Em uso").strip()
         texto = request.form.get("seriais_texto") or ""
 
@@ -289,13 +326,13 @@ def saida():
         if not seriais:
             flash("Cole ou digite pelo menos um número de série.", "erro")
             return render_template("saida.html", status_opcoes=STATUS_OPCOES,
-                                   form_ticket=ticket or "", form_status=status_novo,
+                                   form_observacoes=observacao or "", form_status=status_novo,
                                    form_texto=texto)
 
         if status_novo not in STATUS_OPCOES:
             flash("Status inválido.", "erro")
             return render_template("saida.html", status_opcoes=STATUS_OPCOES,
-                                   form_ticket=ticket or "", form_status=status_novo,
+                                   form_observacoes=observacao or "", form_status=status_novo,
                                    form_texto=texto)
 
         encontrados, nao_encontrados = [], []
@@ -305,8 +342,8 @@ def saida():
             ).first()
             if item:
                 item.status = status_novo
-                if ticket:
-                    item.ticket_jira = ticket
+                if observacao:
+                    item.observacoes = observacao
                 encontrados.append(serial)
             else:
                 nao_encontrados.append(serial)
@@ -316,7 +353,7 @@ def saida():
 
         return render_template(
             "saida_resultado.html",
-            ticket=ticket,
+            observacao=observacao,
             status_novo=status_novo,
             status_novo_slug=status_slug(status_novo),
             encontrados=encontrados,
@@ -324,7 +361,7 @@ def saida():
         )
 
     return render_template("saida.html", status_opcoes=STATUS_OPCOES,
-                           form_ticket="", form_status="Em uso", form_texto="")
+                           form_observacoes="", form_status="Em uso", form_texto="")
 
 
 @equipamentos_bp.route("/")
@@ -357,7 +394,7 @@ def novo():
         item = Equipamento(**dados)
         db.session.add(item)
         db.session.commit()
-        flash(f'Equipamento "{item.nome}" cadastrado com sucesso.', "sucesso")
+        flash(f'Equipamento "{item.fabricante} {item.modelo}" cadastrado com sucesso.', "sucesso")
         return redirect(url_for("equipamentos.listagem"))
 
     return render_template("form_equipamento.html", **_contexto_form())
@@ -380,7 +417,7 @@ def editar(item_id):
         for campo, valor in dados.items():
             setattr(item, campo, valor)
         db.session.commit()
-        flash(f'Equipamento "{item.nome}" atualizado com sucesso.', "sucesso")
+        flash(f'Equipamento "{item.fabricante} {item.modelo}" atualizado com sucesso.', "sucesso")
         return redirect(url_for("equipamentos.listagem"))
 
     return render_template("form_equipamento.html", **_contexto_form(equipamento=item))
@@ -395,10 +432,10 @@ def excluir(item_id):
         flash("Senha incorreta. Exclusão cancelada.", "erro")
         return redirect(url_for("equipamentos.listagem"))
 
-    nome = item.nome
+    identificacao = f"{item.fabricante} {item.modelo}"
     db.session.delete(item)
     db.session.commit()
-    flash(f'Equipamento "{nome}" excluído.', "sucesso")
+    flash(f'Equipamento "{identificacao}" excluído.', "sucesso")
     return redirect(url_for("equipamentos.listagem"))
 
 

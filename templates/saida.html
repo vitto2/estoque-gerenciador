@@ -36,12 +36,10 @@
                     </div>
 
                     <div class="campo">
-                        <label for="ticket_jira">Ticket Jira <span class="campo-opcional">(opcional)</span></label>
-                        <input type="text" id="ticket_jira" name="ticket_jira"
-                               value="{{ form_ticket }}"
-                               placeholder="Ex.: SUPP-1234"
-                               autocomplete="off" spellcheck="false">
-                        <span class="campo-hint">Deixe em branco se não houver um chamado relacionado</span>
+                        <label for="observacoes">Observações <span class="campo-opcional">(opcional)</span></label>
+                        <textarea id="observacoes" name="observacoes" rows="3"
+                                  placeholder="Ex.: SUPP-1234, detalhes da liberação...">{{ form_observacoes }}</textarea>
+                        <span class="campo-hint">Ex.: número do ticket do Jira relacionado a esta saída</span>
                     </div>
                 </div>
             </div>

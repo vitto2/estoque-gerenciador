@@ -352,7 +352,8 @@ a:hover { text-decoration: underline; }
 /* ── FORM CONTROLS ─────────────────────────────────────────────────────── */
 select,
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+textarea {
     padding: 10px 13px;
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
@@ -363,14 +364,17 @@ input[type="number"] {
     width: 100%;
     transition: border-color var(--transition), box-shadow var(--transition);
     font-weight: 500;
+    resize: vertical;
 }
 
 select:hover,
 input[type="text"]:hover,
-input[type="number"]:hover { border-color: #C3CCE0; }
+input[type="number"]:hover,
+textarea:hover { border-color: #C3CCE0; }
 
 select:focus,
-input:focus {
+input:focus,
+textarea:focus {
     outline: none;
     border-color: var(--ml-blue);
     box-shadow: 0 0 0 3px rgba(52,131,250,0.18);

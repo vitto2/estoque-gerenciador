@@ -7,7 +7,7 @@
         <h1>Resultado da saída</h1>
         <p class="page-subtitle">
             Status aplicado: <strong>{{ status_novo }}</strong>
-            {% if ticket %} · Ticket <strong>{{ ticket }}</strong>{% endif %}
+            {% if observacao %} · Observação: <strong>{{ observacao }}</strong>{% endif %}
         </p>
     </div>
 </div>
@@ -48,7 +48,7 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                 <span class="resultado-serial">{{ serial }}</span>
                 <span class="resultado-status-badge status-badge status-{{ status_novo_slug }}">{{ status_novo }}</span>
-                {% if ticket %}<span class="resultado-ticket">{{ ticket }}</span>{% endif %}
+                {% if observacao %}<span class="resultado-ticket">{{ observacao }}</span>{% endif %}
             </li>
             {% endfor %}
         </ul>

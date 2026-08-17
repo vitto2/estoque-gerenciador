@@ -66,13 +66,14 @@
     <table class="tabela-estoque">
         <thead>
             <tr>
-                <th>Nome / Tipo</th>
+                <th>Fabricante / Modelo</th>
                 <th>Serial</th>
-                <th>Ticket Jira</th>
+                <th>Observações</th>
                 <th>Categoria</th>
                 <th>Quantidade</th>
                 <th>Registrado em</th>
                 <th>Local</th>
+                <th>Status Arturito</th>
                 <th>Técnico</th>
                 <th>Status</th>
                 <th></th>
@@ -81,8 +82,8 @@
         <tbody>
             {% for item in itens %}
             <tr data-status="{{ item.status_slug }}">
-                <td data-label="Nome / Tipo" class="td-resumo-mobile">
-                    <span class="item-nome">{{ item.nome }}</span>
+                <td data-label="Fabricante / Modelo" class="td-resumo-mobile">
+                    <span class="item-nome">{{ item.fabricante }} {{ item.modelo }}</span>
                     <button type="button" class="btn-expandir-mobile" onclick="alternarDetalhesEquipamento(this)" aria-label="Ver detalhes">
                         <svg class="seta-expandir" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"/>
@@ -96,9 +97,9 @@
                         <span class="item-sem-serial">—</span>
                     {% endif %}
                 </td>
-                <td data-label="Ticket Jira" class="col-mobile-oculta">
-                    {% if item.ticket_jira %}
-                        <span class="item-ticket">{{ item.ticket_jira }}</span>
+                <td data-label="Observações" class="col-mobile-oculta">
+                    {% if item.observacoes %}
+                        <span class="item-ticket">{{ item.observacoes }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
@@ -109,6 +110,13 @@
                 <td data-label="Local" class="detalhe-mobile">
                     {% if item.local_armazenamento %}
                         <span class="item-local">{{ item.local_armazenamento }}</span>
+                    {% else %}
+                        <span class="item-sem-serial">—</span>
+                    {% endif %}
+                </td>
+                <td data-label="Status Arturito" class="col-mobile-oculta">
+                    {% if item.status_arturito %}
+                        <span class="item-local">{{ item.status_arturito }}</span>
                     {% else %}
                         <span class="item-sem-serial">—</span>
                     {% endif %}
@@ -126,7 +134,7 @@
                     </a>
                     <form method="post" action="{{ url_for('equipamentos.excluir', item_id=item.id) }}"
                           class="form-excluir"
-                          onsubmit="return confirmarExclusao(this, '{{ item.nome | e }}');">
+                          onsubmit="return confirmarExclusao(this, '{{ (item.fabricante ~ " " ~ item.modelo) | e }}');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="senha" class="campo-senha-exclusao">
                         <button type="submit" title="Excluir equipamento">

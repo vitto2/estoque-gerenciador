@@ -9,18 +9,20 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
 CABECALHOS = [
-    "Nome/Tipo",
+    "Fabricante",
+    "Modelo",
     "Número de Série",
-    "Ticket Jira",
     "Categoria",
     "Quantidade",
     "Local de Armazenamento",
+    "Observações",
+    "Status no Arturito",
     "Data de Registro",
     "Técnico Responsável",
     "Status",
 ]
 
-LARGURAS_COLUNAS = [32, 22, 14, 20, 12, 22, 20, 24, 16]
+LARGURAS_COLUNAS = [20, 24, 22, 20, 12, 22, 30, 20, 20, 24, 16]
 
 COR_CABECALHO = "3483FA"
 
@@ -49,12 +51,14 @@ def gerar_planilha_equipamentos(itens):
     for item in itens:
         ws.append(
             [
-                item.nome,
+                item.fabricante,
+                item.modelo,
                 item.serial or "",
-                item.ticket_jira or "",
                 item.categoria,
                 item.quantidade,
                 item.local_armazenamento or "",
+                item.observacoes or "",
+                item.status_arturito or "",
                 item.data_registro.strftime("%d/%m/%Y %H:%M"),
                 item.tecnico_responsavel,
                 item.status,
