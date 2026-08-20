@@ -121,7 +121,7 @@ def _validar_dados(form, item_id=None):
         existente = duplicado.first()
         if existente:
             duplicado_id = existente.id
-            erros.append(f'Já existe um equipamento cadastrado com o serial "{serial}".')
+            erros.append(f'Encontramos um equipamento já cadastrado com o serial "{serial}".')
 
     tecnico = (form.get("tecnico_responsavel") or "").strip()
     if not tecnico:
@@ -157,6 +157,10 @@ def _validar_dados(form, item_id=None):
 
 
 def _contexto_form(equipamento=None, form_data=None, serial_duplicado_id=None):
+    duplicado_equipamento = None
+    if serial_duplicado_id is not None:
+        duplicado_equipamento = Equipamento.query.get(serial_duplicado_id)
+
     return {
         "equipamento": equipamento,
         "valores": _valores_iniciais(equipamento=equipamento, form_data=form_data),
@@ -166,7 +170,7 @@ def _contexto_form(equipamento=None, form_data=None, serial_duplicado_id=None):
         "status_arturito_opcoes": STATUS_ARTURITO_OPCOES,
         "categorias_serial_obrigatorio": CATEGORIAS_COM_SERIAL_OBRIGATORIO,
         "tecnicos_existentes": get_tecnicos_existentes(),
-        "serial_duplicado_id": serial_duplicado_id,
+        "duplicado_equipamento": duplicado_equipamento,
     }
 
 

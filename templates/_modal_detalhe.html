@@ -47,8 +47,7 @@
         return '<div class="etiqueta-linha-campo"><span>' + label + '</span><strong>' + (valor || '—') + '</strong></div>';
     }
 
-    function abrir(linha) {
-        const d = linha.dataset;
+    function abrir(d) {
         document.getElementById('detalhe-categoria').textContent = d.categoria;
         document.getElementById('detalhe-titulo').textContent = d.fabricante + ' ' + d.modelo;
         document.getElementById('detalhe-serial').textContent = d.serial || 'sem serial';
@@ -95,7 +94,7 @@
     // funcionam sem precisar religar nada depois de cada troca.
     document.addEventListener('click', function (e) {
         var linha = e.target.closest('.linha-serial-clicavel');
-        if (linha) abrir(linha);
+        if (linha) abrir(linha.dataset);
     });
     document.getElementById('detalhe-fechar').addEventListener('click', fechar);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) fechar(); });
@@ -105,5 +104,10 @@
     // Excluir dentro do modal: fecha o modal de detalhes e deixa o clique
     // seguir para o listener global de exclusao.js (mesmo evento, fase de bubble).
     document.getElementById('detalhe-excluir').addEventListener('click', fechar);
+
+    // Exposto pra outras telas (ex.: aviso de serial duplicado no
+    // cadastro) abrirem o mesmo modal com os dados de um equipamento
+    // já carregado no servidor, sem precisar de uma linha na tela.
+    window.abrirDetalheEquipamento = abrir;
 })();
 </script>

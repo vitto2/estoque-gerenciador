@@ -104,10 +104,10 @@
                     </div>
                 </div>
             </div>
-            {% if serial_duplicado_id %}
+            {% if duplicado_equipamento %}
             <span class="campo-hint campo-hint-erro">
-                Este serial já está em uso.
-                <a href="{{ url_for('equipamentos.editar', item_id=serial_duplicado_id) }}">Ver equipamento existente</a>
+                Já encontramos esse equipamento no estoque.
+                <button type="button" id="btn-ver-duplicado">Ver detalhes</button>
             </span>
             {% endif %}
         </div>
@@ -183,6 +183,8 @@
         <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Cancelar</a>
     </div>
 </form>
+
+{% include "_modal_detalhe.html" %}
 
 <script src="{{ url_for('static', filename='js/extrair-serial.js') }}"></script>
 <script>
@@ -270,4 +272,37 @@ function esconderEtiquetaExtraida() {
     document.getElementById('etiqueta-extraida').style.display = 'none';
 }
 </script>
+
+{% if duplicado_equipamento %}
+<script>
+(function () {
+    var dadosDuplicado = {
+        fabricante: {{ duplicado_equipamento.fabricante | tojson }},
+        modelo: {{ duplicado_equipamento.modelo | tojson }},
+        categoria: {{ duplicado_equipamento.categoria | tojson }},
+        serial: {{ (duplicado_equipamento.serial or '') | tojson }},
+        local: {{ (duplicado_equipamento.local_armazenamento or '') | tojson }},
+        status: {{ duplicado_equipamento.status | tojson }},
+        statusSlug: {{ duplicado_equipamento.status_slug | tojson }},
+        statusArturito: {{ (duplicado_equipamento.status_arturito or '') | tojson }},
+        quantidade: {{ duplicado_equipamento.quantidade | tojson }},
+        tecnico: {{ duplicado_equipamento.tecnico_responsavel | tojson }},
+        observacoes: {{ (duplicado_equipamento.observacoes or '') | tojson }},
+        dataRegistro: {{ duplicado_equipamento.data_registro.strftime('%d/%m/%Y %H:%M') | tojson }},
+        editarUrl: {{ url_for('equipamentos.editar', item_id=duplicado_equipamento.id) | tojson }},
+        excluirUrl: {{ url_for('equipamentos.excluir', item_id=duplicado_equipamento.id) | tojson }}
+    };
+
+    if (window.abrirDetalheEquipamento) {
+        window.abrirDetalheEquipamento(dadosDuplicado);
+    }
+    var btnVerDuplicado = document.getElementById('btn-ver-duplicado');
+    if (btnVerDuplicado) {
+        btnVerDuplicado.addEventListener('click', function () {
+            window.abrirDetalheEquipamento(dadosDuplicado);
+        });
+    }
+})();
+</script>
+{% endif %}
 {% endblock %}
