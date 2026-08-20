@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
-{% block title %}{{ filtro_fabricante }} {{ filtro_modelo }} — Estoque de TI{% endblock %}
+{% block title %}Busca por “{{ filtro_busca }}” — Estoque de TI{% endblock %}
 
 {% block content %}
 <a href="{{ url_for('equipamentos.listagem') }}" class="link-voltar">
@@ -10,11 +10,11 @@
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1>{{ filtro_fabricante }} {{ filtro_modelo }}</h1>
+        <h1>Busca por “{{ filtro_busca }}”</h1>
         <p class="page-subtitle">Clique num equipamento para ver todos os detalhes</p>
     </div>
     <span class="badge-count">
-        {{ total_itens }} equipamento{{ 's' if total_itens != 1 else '' }}
+        {{ total_itens }} resultado{{ 's' if total_itens != 1 else '' }}
     </span>
 </div>
 
@@ -29,8 +29,19 @@
 {% endif %}
 
 <form method="get" class="filtros filtros-inline">
-    <input type="hidden" name="fabricante" value="{{ filtro_fabricante }}">
-    <input type="hidden" name="modelo" value="{{ filtro_modelo }}">
+    <div class="filtro-campo filtro-campo-busca">
+        <label for="busca">Buscar por serial</label>
+        <input type="search" name="busca" id="busca" placeholder="Ex.: DL0004" value="{{ filtro_busca or '' }}" autocomplete="off">
+    </div>
+    <div class="filtro-campo">
+        <label for="categoria">Categoria</label>
+        <select name="categoria" id="categoria">
+            <option value="">Todas</option>
+            {% for c in categorias %}
+                <option value="{{ c }}" {{ 'selected' if c == filtro_categoria else '' }}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
     <div class="filtro-campo">
         <label for="status">Status</label>
         <select name="status" id="status">
@@ -54,7 +65,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Filtrar
         </button>
-        <a href="{{ url_for('equipamentos.exportar', fabricante=filtro_fabricante, modelo=filtro_modelo, status=filtro_status, tecnico=filtro_tecnico) }}" class="btn btn-exportar">
+        <a href="{{ url_for('equipamentos.exportar', busca=filtro_busca, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}" class="btn btn-exportar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Exportar {{ total_itens }}
         </a>
@@ -67,6 +78,7 @@
         <thead>
             <tr>
                 <th>Serial</th>
+                <th>Modelo</th>
                 <th>Status</th>
                 <th>Local</th>
                 <th>Técnico</th>
@@ -92,6 +104,7 @@
                 <td data-label="Serial">
                     {% if item.serial %}<span class="item-serial">{{ item.serial }}</span>{% else %}<span class="item-sem-serial">sem serial</span>{% endif %}
                 </td>
+                <td data-label="Modelo">{{ item.fabricante }} {{ item.modelo }}</td>
                 <td data-label="Status"><span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span></td>
                 <td data-label="Local">{{ item.local_armazenamento or '—' }}</td>
                 <td data-label="Técnico">{{ item.tecnico_responsavel }}</td>
@@ -103,13 +116,13 @@
 
 {% if paginacao.pages > 1 %}
 <div class="paginacao">
-    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo, pagina=paginacao.prev_num, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
+    <a href="{{ url_for('equipamentos.listagem', busca=filtro_busca, pagina=paginacao.prev_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
        class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_prev else '' }}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         <span class="btn-pagina-texto">Anterior</span>
     </a>
     <span class="paginacao-info">Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
-    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo, pagina=paginacao.next_num, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
+    <a href="{{ url_for('equipamentos.listagem', busca=filtro_busca, pagina=paginacao.next_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
        class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_next else '' }}">
         <span class="btn-pagina-texto">Próxima</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -120,9 +133,9 @@
 {% else %}
 <div class="estado-vazio">
     <span class="estado-vazio-icon">📦</span>
-    <h3>Nenhum equipamento com esses filtros</h3>
-    <p>Tente remover algum filtro para ver os equipamentos deste modelo.</p>
-    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo) }}" class="btn btn-secundario">Limpar filtros</a>
+    <h3>Nenhum equipamento encontrado</h3>
+    <p>Não achamos nenhum serial com “{{ filtro_busca }}”. Confira a grafia ou tente outro trecho.</p>
+    <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar busca</a>
 </div>
 {% endif %}
 

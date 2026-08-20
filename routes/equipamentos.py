@@ -177,6 +177,7 @@ def _filtros_atuais():
         "tecnico": request.args.get("tecnico", "").strip(),
         "fabricante": request.args.get("fabricante", "").strip(),
         "modelo": request.args.get("modelo", "").strip(),
+        "busca": request.args.get("busca", "").strip(),
     }
 
 
@@ -191,6 +192,8 @@ def _aplicar_filtros(query, filtros):
         query = query.filter(Equipamento.fabricante == filtros["fabricante"])
     if filtros.get("modelo"):
         query = query.filter(Equipamento.modelo == filtros["modelo"])
+    if filtros.get("busca"):
+        query = query.filter(Equipamento.serial.ilike(f"%{filtros['busca']}%"))
     return query
 
 
@@ -469,6 +472,35 @@ def listagem():
             filtro_tecnico=filtros["tecnico"],
             filtro_fabricante=filtros["fabricante"],
             filtro_modelo=filtros["modelo"],
+            ultimo_cadastro=ultimo_cadastro,
+        )
+
+    # Busca por serial: ignora o agrupamento por modelo e mostra os
+    # equipamentos correspondentes diretamente, já que o objetivo aqui é
+    # achar um item específico, não navegar por modelo.
+    if filtros["busca"]:
+        query = _aplicar_filtros(Equipamento.query, filtros)
+        query = query.order_by(Equipamento.data_registro.desc())
+
+        pagina = request.args.get("pagina", 1, type=int)
+        if pagina < 1:
+            pagina = 1
+        paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+        if paginacao.pages and pagina > paginacao.pages:
+            paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
+
+        return render_template(
+            "listagem_busca.html",
+            itens=paginacao.items,
+            total_itens=paginacao.total,
+            paginacao=paginacao,
+            categorias=get_categorias_disponiveis(),
+            status_opcoes=STATUS_OPCOES,
+            tecnicos_existentes=get_tecnicos_existentes(),
+            filtro_categoria=filtros["categoria"],
+            filtro_status=filtros["status"],
+            filtro_tecnico=filtros["tecnico"],
+            filtro_busca=filtros["busca"],
             ultimo_cadastro=ultimo_cadastro,
         )
 

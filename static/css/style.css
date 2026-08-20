@@ -871,6 +871,7 @@ a:hover { text-decoration: underline; }
 }
 
 .filtro-campo { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
+.filtro-campo-busca { min-width: 220px; flex: 1 1 220px; }
 
 /* Filtros em drawer — só existe como botão/sheet no mobile (ver media query) */
 .btn-abrir-filtros { display: none; }
@@ -897,6 +898,7 @@ a:hover { text-decoration: underline; }
 select,
 input[type="text"],
 input[type="number"],
+input[type="search"],
 textarea {
     padding: 10px 13px;
     border: 1.5px solid var(--border);
@@ -914,7 +916,10 @@ textarea {
 select:hover,
 input[type="text"]:hover,
 input[type="number"]:hover,
+input[type="search"]:hover,
 textarea:hover { border-color: #C3CCE0; }
+
+input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
 
 select:focus,
 input:focus,
@@ -2098,8 +2103,6 @@ button:focus-visible,
         overflow: visible;
         border: 1px solid var(--border);
         padding: 16px;
-        flex-direction: column;
-        align-items: stretch;
     }
     .filtros-inline .filtro-campo { min-width: 100%; }
     .filtros-inline .filtro-acoes { margin-left: 0; width: 100%; }

@@ -1,0 +1,105 @@
+{# ── Modal de detalhes do equipamento ─────────────────────────────────── #}
+<div class="detalhe-overlay" id="detalhe-overlay" aria-hidden="true">
+    <div class="detalhe-modal" role="dialog" aria-modal="true">
+        <button type="button" class="onboarding-fechar detalhe-fechar" id="detalhe-fechar" aria-label="Fechar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <div class="etiqueta-brba" id="detalhe-etiqueta">
+            <div class="etiqueta-brba-faixa"></div>
+            <div class="etiqueta-brba-corpo">
+                <div class="etiqueta-brba-topo">
+                    <span class="etiqueta-brba-categoria" id="detalhe-categoria"></span>
+                    <span class="etiqueta-brba-codigo">BRBA01</span>
+                </div>
+                <div class="etiqueta-brba-titulo" id="detalhe-titulo"></div>
+                <div class="etiqueta-brba-linha">
+                    <span class="etiqueta-brba-serial" id="detalhe-serial"></span>
+                    <span class="status-badge" id="detalhe-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detalhe-campos" id="detalhe-campos"></div>
+
+        <div class="detalhe-acoes">
+            <a href="#" class="btn btn-secundario" id="detalhe-editar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+            </a>
+            <button type="button" class="btn btn-secundario btn-abrir-exclusao" id="detalhe-excluir">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const overlay = document.getElementById('detalhe-overlay');
+    const modal = overlay.querySelector('.detalhe-modal');
+    const campos = document.getElementById('detalhe-campos');
+    const temGsap = typeof window.gsap !== 'undefined'
+        && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    function campo(label, valor) {
+        return '<div class="etiqueta-linha-campo"><span>' + label + '</span><strong>' + (valor || '—') + '</strong></div>';
+    }
+
+    function abrir(linha) {
+        const d = linha.dataset;
+        document.getElementById('detalhe-categoria').textContent = d.categoria;
+        document.getElementById('detalhe-titulo').textContent = d.fabricante + ' ' + d.modelo;
+        document.getElementById('detalhe-serial').textContent = d.serial || 'sem serial';
+        const statusEl = document.getElementById('detalhe-status');
+        statusEl.textContent = d.status;
+        statusEl.className = 'status-badge status-' + d.statusSlug;
+
+        campos.innerHTML =
+            campo('Quantidade', d.quantidade) +
+            campo('Local de armazenamento', d.local) +
+            campo('Status no Arturito', d.statusArturito) +
+            campo('Técnico responsável', d.tecnico) +
+            campo('Registrado em', d.dataRegistro) +
+            campo('Observações', d.observacoes);
+
+        document.getElementById('detalhe-editar').href = d.editarUrl;
+        const btnExcluir = document.getElementById('detalhe-excluir');
+        btnExcluir.dataset.action = d.excluirUrl;
+        btnExcluir.dataset.fabricante = d.fabricante;
+        btnExcluir.dataset.modelo = d.modelo;
+        btnExcluir.dataset.categoria = d.categoria;
+        btnExcluir.dataset.serial = d.serial;
+        btnExcluir.dataset.local = d.local;
+        btnExcluir.dataset.status = d.status;
+        btnExcluir.dataset.statusSlug = d.statusSlug;
+
+        overlay.classList.add('aberta');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (temGsap) {
+            gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+            gsap.fromTo(modal, { opacity: 0, y: 16, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power3.out' });
+        }
+    }
+
+    function fechar() {
+        overlay.classList.remove('aberta');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.linha-serial-clicavel').forEach(function (linha) {
+        linha.addEventListener('click', function () { abrir(linha); });
+    });
+    document.getElementById('detalhe-fechar').addEventListener('click', fechar);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) fechar(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('aberta')) fechar();
+    });
+    // Excluir dentro do modal: fecha o modal de detalhes e deixa o clique
+    // seguir para o listener global de exclusao.js (mesmo evento, fase de bubble).
+    document.getElementById('detalhe-excluir').addEventListener('click', fechar);
+})();
+</script>
