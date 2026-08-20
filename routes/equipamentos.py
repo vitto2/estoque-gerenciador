@@ -13,6 +13,8 @@ from models import (
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
 
+ITENS_POR_PAGINA = 30
+
 
 def get_categorias_disponiveis():
     """CATEGORIAS fixas + qualquer categoria customizada ('Outro') já cadastrada."""
@@ -368,11 +370,20 @@ def saida():
 def listagem():
     filtros = _filtros_atuais()
     query = _aplicar_filtros(Equipamento.query, filtros)
-    itens = query.order_by(Equipamento.data_registro.desc()).all()
+    query = query.order_by(Equipamento.data_registro.desc())
+
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+    if paginacao.pages and pagina > paginacao.pages:
+        paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
 
     return render_template(
         "listagem.html",
-        itens=itens,
+        itens=paginacao.items,
+        total_itens=paginacao.total,
+        paginacao=paginacao,
         categorias=get_categorias_disponiveis(),
         status_opcoes=STATUS_OPCOES,
         tecnicos_existentes=get_tecnicos_existentes(),

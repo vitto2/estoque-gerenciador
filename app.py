@@ -40,7 +40,7 @@ def create_app():
 
     @app.route("/")
     def index():
-        return redirect(url_for("equipamentos.listagem"))
+        return redirect(url_for("dashboard.dashboard"))
 
     @app.errorhandler(404)
     def nao_encontrado(_erro):

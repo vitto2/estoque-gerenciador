@@ -8,7 +8,7 @@
         <p class="page-subtitle">Veja, edite ou remova qualquer equipamento cadastrado</p>
     </div>
     <span class="badge-count">
-        {{ itens|length }} {{ 'registro' if itens|length == 1 else 'registros' }}
+        {{ total_itens }} {{ 'registro' if total_itens == 1 else 'registros' }}
     </span>
 </div>
 
@@ -61,7 +61,7 @@
     </div>
 </form>
 
-{% if itens %}
+{% if total_itens %}
 <div class="tabela-wrapper">
     <table class="tabela-estoque">
         <thead>
@@ -150,6 +150,23 @@
         </tbody>
     </table>
 </div>
+
+{% if paginacao.pages > 1 %}
+<div class="paginacao">
+    <a href="{{ url_for('equipamentos.listagem', pagina=paginacao.prev_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
+       class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_prev else '' }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <span class="btn-pagina-texto">Anterior</span>
+    </a>
+    <span class="paginacao-info">Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
+    <a href="{{ url_for('equipamentos.listagem', pagina=paginacao.next_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
+       class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_next else '' }}">
+        <span class="btn-pagina-texto">Próxima</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+</div>
+{% endif %}
+
 {% else %}
 {% set tem_filtro = filtro_categoria or filtro_status or filtro_tecnico %}
 <div class="estado-vazio">
