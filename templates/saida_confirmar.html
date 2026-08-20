@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}Confirmar saída — Estoque de TI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Confirmar movimentação</h1>
+        <p class="page-subtitle">Nada foi alterado ainda — confira antes de aplicar</p>
+    </div>
+</div>
+
+<div class="confirmacao-resumo">
+    <p>
+        <strong>{{ encontrados|length }}</strong> equipamento{{ 's' if encontrados|length != 1 else '' }}
+        prontos para atualizar para <span class="status-badge status-{{ status_novo_slug }}">{{ status_novo }}</span>.
+        {% if nao_encontrados %}<strong>{{ nao_encontrados|length }}</strong> número{{ 's' if nao_encontrados|length != 1 else '' }} de série
+        não {{ 'foi encontrado' if nao_encontrados|length == 1 else 'foram encontrados' }} no estoque.{% endif %}
+        {% if duplicados %}<strong>{{ duplicados|length }}</strong> repetido{{ 's' if duplicados|length != 1 else '' }} na lista, ignorado{{ 's' if duplicados|length != 1 else '' }}.{% endif %}
+    </p>
+</div>
+
+{% if encontrados %}
+<div class="lote-card" style="margin-bottom: 16px;">
+    <div class="lote-card-header">
+        <span>Serão atualizados agora</span>
+        <span class="lote-contador-badge">{{ encontrados|length }}</span>
+    </div>
+    <div class="etiquetas-grid">
+        {% for item in encontrados %}
+            {{ macros.etiqueta(item.fabricante, item.modelo, item.categoria, item.serial, item.local_armazenamento, item.status, item.status_slug) }}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if nao_encontrados %}
+<div class="lote-card" style="margin-bottom: 16px;">
+    <div class="lote-card-header" style="color: var(--vermelho);">
+        <span>Não encontrados no estoque — não serão afetados</span>
+        <span class="lote-contador-badge" style="background: var(--vermelho);">{{ nao_encontrados|length }}</span>
+    </div>
+    <ul class="resultado-lista">
+        {% for serial in nao_encontrados %}
+        <li class="resultado-item resultado-item-erro">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span class="resultado-serial">{{ serial }}</span>
+            <span class="resultado-hint">confira a digitação ou cadastre-o primeiro</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if not encontrados %}
+<div class="estado-vazio">
+    <h3>Nenhum equipamento encontrado</h3>
+    <p>Nenhum dos números de série informados corresponde a um equipamento no estoque.</p>
+    <a href="{{ url_for('equipamentos.saida') }}" class="btn btn-secundario">Corrigir lista</a>
+</div>
+{% else %}
+<form method="post" action="{{ url_for('equipamentos.saida') }}" class="form-acoes" style="margin-top: 8px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="status" value="{{ status_novo }}">
+    <input type="hidden" name="observacoes" value="{{ observacoes or '' }}">
+    <input type="hidden" name="seriais_texto" value="{{ seriais_confirmados }}">
+    <button type="submit" class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar atualização de {{ encontrados|length }} equipamento{{ 's' if encontrados|length != 1 else '' }}
+    </button>
+    <a href="{{ url_for('equipamentos.saida') }}" class="btn btn-secundario">Corrigir lista</a>
+</form>
+{% endif %}
+{% endblock %}

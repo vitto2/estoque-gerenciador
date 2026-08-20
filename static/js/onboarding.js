@@ -15,7 +15,8 @@
     var btnReabrir = document.getElementById("btn-reabrir-onboarding");
 
     var indiceAtual = 0;
-    var temGsap = typeof window.gsap !== "undefined";
+    var reduzido = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var temGsap = typeof window.gsap !== "undefined" && !reduzido;
 
     function animarSlideAtual() {
         var ativo = slides[indiceAtual];

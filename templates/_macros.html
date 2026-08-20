@@ -1,0 +1,36 @@
+{# ─────────────────────────────────────────────────────────────────────
+   Etiqueta BRBA01 — elemento de assinatura do sistema.
+   Inspirada numa etiqueta técnica de equipamento: cantos quase retos,
+   divisores finos, faixa amarela lateral, identificadores em monoespaçada.
+   Usada na listagem (mobile), na confirmação de saída, na exclusão e
+   no resultado da leitura por foto — não como card decorativo genérico.
+   ───────────────────────────────────────────────────────────────────── #}
+{% macro etiqueta(fabricante, modelo, categoria, serial=None, localizacao=None, status=None, status_slug_valor=None, status_arturito=None, codigo="BRBA01") %}
+<div class="etiqueta-brba">
+    <div class="etiqueta-brba-faixa"></div>
+    <div class="etiqueta-brba-corpo">
+        <div class="etiqueta-brba-topo">
+            <span class="etiqueta-brba-categoria">{{ categoria }}</span>
+            <span class="etiqueta-brba-codigo">{{ codigo }}</span>
+        </div>
+        <div class="etiqueta-brba-titulo">{{ fabricante }} {{ modelo }}</div>
+        <div class="etiqueta-brba-linha">
+            {% if serial %}
+                <span class="etiqueta-brba-serial">{{ serial }}</span>
+            {% else %}
+                <span class="etiqueta-brba-sem-serial">sem serial</span>
+            {% endif %}
+            {% if status %}
+                <span class="status-badge status-{{ status_slug_valor }}">{{ status }}</span>
+            {% endif %}
+        </div>
+        {% if localizacao or status_arturito %}
+        <div class="etiqueta-brba-rodape">
+            {% if localizacao %}<span>{{ localizacao }}</span>{% endif %}
+            {% if localizacao and status_arturito %}<span class="etiqueta-brba-divisor">·</span>{% endif %}
+            {% if status_arturito %}<span>Arturito: {{ status_arturito }}</span>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

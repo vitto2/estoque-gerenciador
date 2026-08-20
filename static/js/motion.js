@@ -1,6 +1,7 @@
 (function () {
     "use strict";
     if (typeof window.gsap === "undefined") return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     document.addEventListener("DOMContentLoaded", function () {
         var tl = gsap.timeline({ defaults: { ease: "power3.out" } });

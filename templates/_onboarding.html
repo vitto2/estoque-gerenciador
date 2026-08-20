@@ -1,3 +1,4 @@
+{% import "_macros.html" as macros %}
 <div class="onboarding-overlay" id="onboarding-overlay" aria-hidden="true">
     <div class="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-titulo">
 
@@ -35,31 +36,33 @@
             <div class="onboarding-slide" data-slide="1">
                 <div class="onboarding-slide-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                        <circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/>
                     </svg>
                 </div>
-                <h2>Cadastre em segundos</h2>
-                <p>Registre um equipamento por vez, ou vários iguais de uma só vez — só o número de série muda entre eles. A foto da etiqueta já preenche o serial pra você.</p>
+                <h2>Consulte o estoque</h2>
+                <p>Cada equipamento aparece com fabricante, modelo, serial, local e status — filtre por categoria, status ou técnico responsável.</p>
+                {{ macros.etiqueta('Zebra', 'TC22', 'Handheld', 'SN-2612', 'Estoque principal', 'Disponível', 'disponivel') }}
             </div>
 
             <div class="onboarding-slide" data-slide="2">
                 <div class="onboarding-slide-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
                     </svg>
                 </div>
-                <h2>Saída em lote e exportação</h2>
-                <p>Cole uma lista de números de série pra liberar ou atualizar o status de vários equipamentos de uma vez, e exporte tudo pro Excel quando precisar.</p>
+                <h2>Cadastre ou fotografe uma etiqueta</h2>
+                <p>Registre um equipamento por vez ou vários iguais de uma só vez. Fotografe a etiqueta e o número de série é lido automaticamente.</p>
             </div>
 
             <div class="onboarding-slide" data-slide="3">
                 <div class="onboarding-slide-icon">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/>
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
                 </div>
-                <h2>Painel com o que importa</h2>
-                <p>Acompanhe unidades por categoria, fabricante e localização, além das pendências de verificação no Arturito — tudo em tempo real.</p>
+                <h2>Movimente, filtre e exporte</h2>
+                <p>Cole uma lista de números de série para atualizar vários equipamentos de uma vez, e exporte a visão atual do estoque para Excel quando precisar.</p>
             </div>
 
         </div>

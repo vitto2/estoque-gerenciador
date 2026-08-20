@@ -5,127 +5,92 @@
 <div class="page-header">
     <div class="page-header-left">
         <h1>Painel</h1>
-        <p class="page-subtitle">Um resumo geral do que está no seu estoque agora</p>
+        <p class="page-subtitle">Situação do estoque agora</p>
     </div>
 </div>
 
 {% if total_registros == 0 %}
 <div class="estado-vazio">
-    <span class="estado-vazio-icon">📊</span>
+    <span class="estado-vazio-icon">📋</span>
     <h3>Ainda não há nada para mostrar aqui</h3>
     <p>Cadastre equipamentos para ver os números e gráficos do seu estoque.</p>
     <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
 </div>
 {% else %}
 
-{# ── KPI Cards ── #}
-<div class="painel-hero">
-<p class="painel-hero-titulo">Visão geral</p>
-<div class="resumo-cards">
-
-    <div class="card-resumo">
-        <div class="card-resumo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
-            </svg>
-        </div>
-        <span class="card-resumo-valor">{{ total_itens }}</span>
-        <span class="card-resumo-label" title="Soma da quantidade de todos os equipamentos cadastrados">Unidades no estoque</span>
+{# ── Situação do estoque ── #}
+<section class="situacao-estoque">
+    <div class="situacao-principal">
+        <span class="situacao-numero">{{ total_itens }}</span>
+        <span class="situacao-numero-label">unidades no estoque</span>
+        <span class="situacao-numero-sub">{{ total_registros }} registro{{ 's' if total_registros != 1 else '' }} cadastrado{{ 's' if total_registros != 1 else '' }} · {{ fabricantes_distintos }} fabricante{{ 's' if fabricantes_distintos != 1 else '' }}</span>
     </div>
 
-    <div class="card-resumo">
-        <div class="card-resumo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 21V8l9-6 9 6v13"/><path d="M9 21v-8h6v8"/>
-            </svg>
-        </div>
-        <span class="card-resumo-valor">{{ fabricantes_distintos }}</span>
-        <span class="card-resumo-label" title="Quantos fabricantes diferentes aparecem no estoque">Fabricantes distintos</span>
+    <div class="situacao-fila">
+        <span class="situacao-fila-titulo">Fila de atenção</span>
+
+        <a href="{{ url_for('equipamentos.listagem') }}" class="situacao-fila-item {{ 'situacao-fila-alerta' if sem_serial > 0 else '' }}">
+            <span class="situacao-fila-marcador"></span>
+            <span class="situacao-fila-texto">Sem número de série cadastrado</span>
+            <span class="situacao-fila-numero">{{ sem_serial }}</span>
+        </a>
+
+        <a href="{{ url_for('equipamentos.listagem') }}" class="situacao-fila-item {{ 'situacao-fila-alerta' if pendentes_arturito > 0 else '' }}">
+            <span class="situacao-fila-marcador"></span>
+            <span class="situacao-fila-texto">Pendentes de verificação no Arturito</span>
+            <span class="situacao-fila-numero">{{ pendentes_arturito }}</span>
+        </a>
     </div>
+</section>
 
-    <div class="card-resumo {{ 'card-resumo-alerta' if sem_serial > 0 else '' }}">
-        <div class="card-resumo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="3" y1="12" x2="21" y2="12"/>
-            </svg>
-        </div>
-        <span class="card-resumo-valor">{{ sem_serial }}</span>
-        <span class="card-resumo-label" title="Equipamentos cadastrados sem número de série preenchido">Sem serial cadastrado</span>
-    </div>
+{# ── Ações rápidas ── #}
+<nav class="acoes-rapidas">
+    <a href="{{ url_for('equipamentos.novo') }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Cadastrar equipamento
+    </a>
+    <a href="{{ url_for('equipamentos.lote') }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Cadastrar em lote
+    </a>
+    <a href="{{ url_for('equipamentos.novo') }}#serial">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Ler etiqueta por foto
+    </a>
+    <a href="{{ url_for('equipamentos.saida') }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Dar saída em lote
+    </a>
+    <a href="{{ url_for('equipamentos.exportar') }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar {{ total_registros }} registros
+    </a>
+</nav>
 
-    <div class="card-resumo {{ 'card-resumo-alerta' if pendentes_arturito > 0 else '' }}">
-        <div class="card-resumo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-        </div>
-        <span class="card-resumo-valor">{{ pendentes_arturito }}</span>
-        <span class="card-resumo-label" title="Equipamentos com status 'Pendente de verificação' no Arturito">Pendentes no Arturito</span>
-    </div>
-
-</div>
-</div>
-
-{# ── Charts ── #}
+{# ── Gráficos ── #}
 <div class="graficos-grid">
     <div class="card-grafico">
-        <div class="card-grafico-header">
-            <div class="card-grafico-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/>
-                </svg>
-            </div>
-            <h2>Unidades por categoria</h2>
-        </div>
-        <div class="grafico-canvas-wrap"><canvas id="graficoCategoria"></canvas></div>
+        <div class="card-grafico-header"><h2>Unidades por categoria</h2></div>
+        <div class="grafico-canvas-wrap grafico-canvas-wrap-barra"><canvas id="graficoCategoria"></canvas></div>
     </div>
 
     <div class="card-grafico">
-        <div class="card-grafico-header">
-            <div class="card-grafico-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 21V8l9-6 9 6v13"/><path d="M9 21v-8h6v8"/>
-                </svg>
-            </div>
-            <h2>Unidades por fabricante</h2>
-        </div>
-        <div class="grafico-canvas-wrap"><canvas id="graficoFabricante"></canvas></div>
+        <div class="card-grafico-header"><h2>Unidades por fabricante</h2></div>
+        <div class="grafico-canvas-wrap grafico-canvas-wrap-barra"><canvas id="graficoFabricante"></canvas></div>
     </div>
 
     <div class="card-grafico">
-        <div class="card-grafico-header">
-            <div class="card-grafico-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-            </div>
-            <h2>Unidades por localização</h2>
-        </div>
-        <div class="grafico-canvas-wrap"><canvas id="graficoLocalizacao"></canvas></div>
+        <div class="card-grafico-header"><h2>Unidades por localização</h2></div>
+        <div class="grafico-canvas-wrap grafico-canvas-wrap-barra"><canvas id="graficoLocalizacao"></canvas></div>
     </div>
 
     <div class="card-grafico">
-        <div class="card-grafico-header">
-            <div class="card-grafico-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-            </div>
-            <h2>Status no Arturito</h2>
-        </div>
-        <div class="grafico-canvas-wrap"><canvas id="graficoArturito"></canvas></div>
+        <div class="card-grafico-header"><h2>Status no Arturito</h2></div>
+        <div class="grafico-canvas-wrap grafico-canvas-wrap-barra"><canvas id="graficoArturito"></canvas></div>
     </div>
 
     <div class="card-grafico card-grafico-largo">
-        <div class="card-grafico-header">
-            <div class="card-grafico-header-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
-            </div>
-            <h2>Cadastros por dia</h2>
-        </div>
+        <div class="card-grafico-header"><h2>Cadastros por dia</h2></div>
         <div class="grafico-canvas-wrap"><canvas id="graficoEvolucao"></canvas></div>
     </div>
 </div>
@@ -138,89 +103,42 @@ const dadosLocalizacao = { labels: {{ localizacao_labels|tojson }},  valores: {{
 const dadosArturito    = { labels: {{ arturito_labels|tojson }},     valores: {{ arturito_valores|tojson }}     };
 const dadosEvolucao    = { labels: {{ evolucao_labels|tojson }},     valores: {{ evolucao_valores|tojson }}     };
 
-// Mercado Livre palette
-const ML_BLUE   = '#3483FA';
-const ML_YELLOW = '#FFE600';
-const ML_GREEN  = '#00A650';
-const ML_ORANGE = '#FF7733';
-const ML_GRAY   = '#AAAAAA';
-const ML_PURPLE = '#6B46C1';
+const AMARELO = '#FFE600';
+const GRAFITE_SUAVE = '#C7C3B8';
+const GRAFITE = '#565A63';
 
-const PALETA = [ML_BLUE, ML_GREEN, ML_ORANGE, ML_PURPLE, '#00C4B3', '#E5484D', '#F5A623'];
-
-const coresArturito = {
-    'Atualizado': ML_GREEN,
-    'Pendente de verificação': ML_ORANGE,
-    'Não informado': ML_GRAY,
-};
-
-const gridColor = 'rgba(15,42,92,0.06)';
 const fontFamily = "'Inter', -apple-system, sans-serif";
-
 Chart.defaults.font.family = fontFamily;
-Chart.defaults.color = '#999999';
+Chart.defaults.color = '#8B8F97';
 
-function graficoBarra(id, dados, cor) {
+// Barra horizontal, rótulos diretos (eixo Y), amarelo só no maior valor.
+function graficoBarraHorizontal(id, dados) {
+    if (!dados.valores.length) return;
+    const indiceMaior = dados.valores.indexOf(Math.max(...dados.valores));
+    const cores = dados.valores.map((_, i) => i === indiceMaior ? AMARELO : GRAFITE_SUAVE);
     new Chart(document.getElementById(id), {
         type: 'bar',
         data: {
             labels: dados.labels,
-            datasets: [{
-                label: 'Quantidade',
-                data: dados.valores,
-                backgroundColor: cor,
-                hoverBackgroundColor: cor,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
+            datasets: [{ data: dados.valores, backgroundColor: cores, borderRadius: 3, borderSkipped: false, maxBarThickness: 22 }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0, font: { weight: '700' } },
-                    grid: { color: gridColor }
-                },
-                x: { grid: { display: false } }
+                x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: '#EFEDE7' } },
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' }, color: '#17181C' } }
             }
         }
     });
 }
 
-function graficoRosca(id, dados, cores) {
-    new Chart(document.getElementById(id), {
-        type: 'doughnut',
-        data: {
-            labels: dados.labels,
-            datasets: [{
-                data: dados.valores,
-                backgroundColor: cores,
-                borderWidth: 3,
-                borderColor: '#FFFFFF',
-                hoverOffset: 6,
-            }]
-        },
-        options: {
-            cutout: '62%',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10, font: { weight: '700', size: 13 } }
-                }
-            }
-        }
-    });
-}
-
-graficoBarra('graficoCategoria', dadosCategoria, ML_BLUE);
-graficoBarra('graficoFabricante', dadosFabricante, ML_PURPLE);
-graficoRosca('graficoLocalizacao', dadosLocalizacao, dadosLocalizacao.labels.map((_, i) => PALETA[i % PALETA.length]));
-graficoRosca('graficoArturito', dadosArturito, dadosArturito.labels.map(l => coresArturito[l] || ML_GRAY));
+graficoBarraHorizontal('graficoCategoria', dadosCategoria);
+graficoBarraHorizontal('graficoFabricante', dadosFabricante);
+graficoBarraHorizontal('graficoLocalizacao', dadosLocalizacao);
+graficoBarraHorizontal('graficoArturito', dadosArturito);
 
 new Chart(document.getElementById('graficoEvolucao'), {
     type: 'line',
@@ -229,13 +147,13 @@ new Chart(document.getElementById('graficoEvolucao'), {
         datasets: [{
             label: 'Registros',
             data: dadosEvolucao.valores,
-            borderColor: ML_BLUE,
-            backgroundColor: 'rgba(52,131,250,0.10)',
-            borderWidth: 2.5,
-            pointBackgroundColor: ML_BLUE,
-            pointRadius: 4,
-            pointHoverRadius: 7,
-            tension: 0.35,
+            borderColor: GRAFITE,
+            backgroundColor: 'rgba(23,24,28,0.05)',
+            borderWidth: 2,
+            pointBackgroundColor: GRAFITE,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.3,
             fill: true,
         }]
     },
@@ -244,19 +162,11 @@ new Chart(document.getElementById('graficoEvolucao'), {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0, font: { weight: '700' } },
-                grid: { color: gridColor }
-            },
+            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EFEDE7' } },
             x: { grid: { display: false } }
         }
     }
 });
 </script>
 {% endif %}
-{% endblock %}
-
-{% block scripts_extra %}
-<script src="{{ url_for('static', filename='js/dashboard-motion.js') }}"></script>
 {% endblock %}

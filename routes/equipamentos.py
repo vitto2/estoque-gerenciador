@@ -86,6 +86,7 @@ def _validar_dados(form, item_id=None):
     `item_id` é o id do equipamento em edição (None em cadastros novos), usado para
     não comparar o serial contra o próprio registro na checagem de duplicidade."""
     erros = []
+    duplicado_id = None
 
     fabricante = (form.get("fabricante") or "").strip()
     if not fabricante:
@@ -117,7 +118,9 @@ def _validar_dados(form, item_id=None):
         duplicado = Equipamento.query.filter(db.func.lower(Equipamento.serial) == serial.lower())
         if item_id is not None:
             duplicado = duplicado.filter(Equipamento.id != item_id)
-        if duplicado.first():
+        existente = duplicado.first()
+        if existente:
+            duplicado_id = existente.id
             erros.append(f'Já existe um equipamento cadastrado com o serial "{serial}".')
 
     tecnico = (form.get("tecnico_responsavel") or "").strip()
@@ -150,10 +153,10 @@ def _validar_dados(form, item_id=None):
         "observacoes": observacoes,
         "status_arturito": status_arturito,
     }
-    return dados, erros
+    return dados, erros, duplicado_id
 
 
-def _contexto_form(equipamento=None, form_data=None):
+def _contexto_form(equipamento=None, form_data=None, serial_duplicado_id=None):
     return {
         "equipamento": equipamento,
         "valores": _valores_iniciais(equipamento=equipamento, form_data=form_data),
@@ -163,6 +166,7 @@ def _contexto_form(equipamento=None, form_data=None):
         "status_arturito_opcoes": STATUS_ARTURITO_OPCOES,
         "categorias_serial_obrigatorio": CATEGORIAS_COM_SERIAL_OBRIGATORIO,
         "tecnicos_existentes": get_tecnicos_existentes(),
+        "serial_duplicado_id": serial_duplicado_id,
     }
 
 
@@ -316,6 +320,51 @@ def lote():
     return render_template("lote.html", **_contexto_lote())
 
 
+@equipamentos_bp.route("/saida/validar", methods=["POST"])
+def saida_validar():
+    """Etapa de conferência: só consulta o estoque, não altera nada.
+    Mostra o que será afetado antes do usuário confirmar a movimentação."""
+    observacao = (request.form.get("observacoes") or "").strip() or None
+    status_novo = (request.form.get("status") or "Em uso").strip()
+    texto = request.form.get("seriais_texto") or ""
+    seriais = [s.strip() for s in texto.splitlines() if s.strip()]
+
+    if not seriais:
+        flash("Cole ou digite pelo menos um número de série.", "erro")
+        return render_template("saida.html", status_opcoes=STATUS_OPCOES,
+                               form_observacoes=observacao or "", form_status=status_novo,
+                               form_texto=texto)
+    if status_novo not in STATUS_OPCOES:
+        flash("Status inválido.", "erro")
+        return render_template("saida.html", status_opcoes=STATUS_OPCOES,
+                               form_observacoes=observacao or "", form_status=status_novo,
+                               form_texto=texto)
+
+    vistos, duplicados, encontrados, nao_encontrados = set(), [], [], []
+    for serial in seriais:
+        chave = serial.lower()
+        if chave in vistos:
+            duplicados.append(serial)
+            continue
+        vistos.add(chave)
+        item = Equipamento.query.filter(db.func.lower(Equipamento.serial) == chave).first()
+        if item:
+            encontrados.append(item)
+        else:
+            nao_encontrados.append(serial)
+
+    return render_template(
+        "saida_confirmar.html",
+        encontrados=encontrados,
+        nao_encontrados=nao_encontrados,
+        duplicados=duplicados,
+        status_novo=status_novo,
+        status_novo_slug=status_slug(status_novo),
+        observacoes=observacao,
+        seriais_confirmados="\n".join(item.serial for item in encontrados),
+    )
+
+
 @equipamentos_bp.route("/saida", methods=["GET", "POST"])
 def saida():
     if request.method == "POST":
@@ -396,11 +445,12 @@ def listagem():
 @equipamentos_bp.route("/novo", methods=["GET", "POST"])
 def novo():
     if request.method == "POST":
-        dados, erros = _validar_dados(request.form)
+        dados, erros, duplicado_id = _validar_dados(request.form)
         if erros:
             for e in erros:
                 flash(e, "erro")
-            return render_template("form_equipamento.html", **_contexto_form(form_data=request.form))
+            return render_template("form_equipamento.html",
+                                   **_contexto_form(form_data=request.form, serial_duplicado_id=duplicado_id))
 
         item = Equipamento(**dados)
         db.session.add(item)
@@ -416,13 +466,13 @@ def editar(item_id):
     item = Equipamento.query.get_or_404(item_id)
 
     if request.method == "POST":
-        dados, erros = _validar_dados(request.form, item_id=item.id)
+        dados, erros, duplicado_id = _validar_dados(request.form, item_id=item.id)
         if erros:
             for e in erros:
                 flash(e, "erro")
             return render_template(
                 "form_equipamento.html",
-                **_contexto_form(equipamento=item, form_data=request.form),
+                **_contexto_form(equipamento=item, form_data=request.form, serial_duplicado_id=duplicado_id),
             )
 
         for campo, valor in dados.items():

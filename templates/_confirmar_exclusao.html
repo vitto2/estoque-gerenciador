@@ -1,0 +1,41 @@
+<div class="exclusao-overlay" id="exclusao-overlay" aria-hidden="true">
+    <div class="exclusao-modal" role="dialog" aria-modal="true" aria-labelledby="exclusao-titulo">
+        <h2 id="exclusao-titulo" class="exclusao-titulo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Excluir equipamento
+        </h2>
+        <p class="exclusao-aviso">Esta ação não pode ser desfeita.</p>
+
+        <div class="etiqueta-brba" id="exclusao-etiqueta">
+            <div class="etiqueta-brba-faixa" style="background: var(--vermelho);"></div>
+            <div class="etiqueta-brba-corpo">
+                <div class="etiqueta-brba-topo">
+                    <span class="etiqueta-brba-categoria" id="exclusao-categoria"></span>
+                    <span class="etiqueta-brba-codigo">BRBA01</span>
+                </div>
+                <div class="etiqueta-brba-titulo" id="exclusao-titulo-equip"></div>
+                <div class="etiqueta-brba-linha">
+                    <span class="etiqueta-brba-serial" id="exclusao-serial"></span>
+                    <span class="status-badge" id="exclusao-status"></span>
+                </div>
+                <div class="etiqueta-brba-rodape" id="exclusao-local"></div>
+            </div>
+        </div>
+
+        <form method="post" id="form-exclusao-modal">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="campo" style="margin-top: 16px;">
+                <label for="exclusao-senha">Senha de confirmação</label>
+                <input type="password" id="exclusao-senha" name="senha" autocomplete="off" required>
+                <span class="campo-hint campo-hint-erro" id="exclusao-erro" style="display:none;">Digite a senha para confirmar.</span>
+            </div>
+            <div class="exclusao-acoes">
+                <button type="button" class="btn btn-secundario" id="exclusao-cancelar">Cancelar</button>
+                <button type="submit" class="btn btn-perigo">Excluir definitivamente</button>
+            </div>
+        </form>
+    </div>
+</div>
