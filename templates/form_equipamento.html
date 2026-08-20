@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 {% block title %}{{ 'Editar equipamento' if equipamento else 'Novo equipamento' }} — Estoque de TI{% endblock %}
 
 {% block content %}
@@ -11,6 +12,12 @@
     </div>
 </div>
 
+{% if equipamento %}
+<div class="pagina-etiqueta-cabecalho">
+    {{ macros.etiqueta(equipamento.fabricante, equipamento.modelo, equipamento.categoria, equipamento.serial, equipamento.local_armazenamento, equipamento.status, equipamento.status_slug, equipamento.status_arturito) }}
+</div>
+{% endif %}
+
 {% if not equipamento %}
 <div class="modo-cadastro-tabs">
     <span class="modo-cadastro-tab modo-cadastro-tab-ativo">Um equipamento</span>
@@ -22,7 +29,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="form-card-header">
-        <h2>{{ 'Editando: ' ~ equipamento.fabricante ~ ' ' ~ equipamento.modelo if equipamento else 'Dados do equipamento' }}</h2>
+        <h2>Dados do equipamento</h2>
         <p>Campos com <span class="campo-obrigatorio">*</span> são obrigatórios</p>
     </div>
 
