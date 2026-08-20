@@ -472,8 +472,9 @@ textarea:focus {
 /* Faixa de status: uma leitura rápida de cor antes mesmo de ler o texto —
    útil pra quem está conferindo estoque físico rolando a lista rápido. */
 .tabela-estoque tbody tr[data-status="disponivel"] td:first-child { box-shadow: inset 4px 0 0 0 var(--verde); }
+.tabela-estoque tbody tr[data-status="reservado"] td:first-child { box-shadow: inset 4px 0 0 0 var(--roxo); }
 .tabela-estoque tbody tr[data-status="em-uso"] td:first-child { box-shadow: inset 4px 0 0 0 var(--azul-eletrico); }
-.tabela-estoque tbody tr[data-status="manutencao"] td:first-child { box-shadow: inset 4px 0 0 0 var(--laranja); }
+.tabela-estoque tbody tr[data-status="em-manutencao"] td:first-child { box-shadow: inset 4px 0 0 0 var(--laranja); }
 .tabela-estoque tbody tr[data-status="baixado"] td:first-child { box-shadow: inset 4px 0 0 0 var(--tinta-leve); }
 
 .item-nome { font-weight: 700; color: var(--text); font-size: 14px; }
@@ -526,11 +527,14 @@ textarea:focus {
 .status-disponivel  { background: var(--ml-green-light);  color: #005C29; }
 .status-disponivel::before  { background: var(--ml-green); }
 
+.status-reservado   { background: var(--roxo-claro);      color: #4C2E96; }
+.status-reservado::before   { background: var(--roxo); }
+
 .status-em-uso      { background: var(--ml-blue-light);   color: #1A4FA0; }
 .status-em-uso::before      { background: var(--ml-blue); }
 
-.status-manutencao  { background: var(--ml-orange-light); color: #A03D00; }
-.status-manutencao::before  { background: var(--ml-orange); }
+.status-em-manutencao { background: var(--ml-orange-light); color: #A03D00; }
+.status-em-manutencao::before { background: var(--ml-orange); }
 
 .status-baixado     { background: #F0F0F0; color: #666; }
 .status-baixado::before     { background: #AAAAAA; }
@@ -709,8 +713,9 @@ textarea:focus {
 .card-resumo:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
 .card-resumo:nth-child(2) { border-top-color: var(--amarelo-spark-dark); }
 .card-resumo[data-status="disponivel"] { border-top-color: var(--verde); }
+.card-resumo[data-status="reservado"] { border-top-color: var(--roxo); }
 .card-resumo[data-status="em-uso"] { border-top-color: var(--azul-eletrico); }
-.card-resumo[data-status="manutencao"] { border-top-color: var(--laranja); }
+.card-resumo[data-status="em-manutencao"] { border-top-color: var(--laranja); }
 .card-resumo[data-status="baixado"] { border-top-color: var(--tinta-leve); }
 
 .card-resumo-icon {
@@ -726,8 +731,9 @@ textarea:focus {
 }
 .card-resumo:nth-child(2) .card-resumo-icon { background: #FFF6CC; color: #8A7200; }
 .card-resumo[data-status="disponivel"] .card-resumo-icon { background: var(--verde-claro); color: var(--verde); }
+.card-resumo[data-status="reservado"] .card-resumo-icon { background: var(--roxo-claro); color: var(--roxo); }
 .card-resumo[data-status="em-uso"] .card-resumo-icon { background: var(--ml-blue-light); color: var(--azul-eletrico); }
-.card-resumo[data-status="manutencao"] .card-resumo-icon { background: var(--laranja-claro); color: var(--laranja); }
+.card-resumo[data-status="em-manutencao"] .card-resumo-icon { background: var(--laranja-claro); color: var(--laranja); }
 .card-resumo[data-status="baixado"] .card-resumo-icon { background: #F0F0F0; color: #888; }
 
 .card-resumo-valor {
@@ -1280,8 +1286,9 @@ button:focus-visible,
         border-left: 4px solid transparent;
     }
     .tabela-estoque tbody tr[data-status="disponivel"] { border-left-color: var(--verde); }
+    .tabela-estoque tbody tr[data-status="reservado"] { border-left-color: var(--roxo); }
     .tabela-estoque tbody tr[data-status="em-uso"] { border-left-color: var(--azul-eletrico); }
-    .tabela-estoque tbody tr[data-status="manutencao"] { border-left-color: var(--laranja); }
+    .tabela-estoque tbody tr[data-status="em-manutencao"] { border-left-color: var(--laranja); }
     .tabela-estoque tbody tr[data-status="baixado"] { border-left-color: var(--tinta-leve); }
     .tabela-estoque tbody tr[data-status] td:first-child { box-shadow: none; }
     .tabela-estoque tbody tr:hover { background: var(--surface); }

@@ -17,39 +17,40 @@ db = SQLAlchemy()
 # facilitar manutenção (adicionar/remover categoria = editar 1 lista).
 CATEGORIAS = [
     "Notebook",
+    "Desktop",
     "Monitor",
-    "Periférico",
-    "Cabo",
+    "Handheld",
     "Impressora",
-    "Coletor de Dados",
-    "Leitor/Scanner",
+    "Acessório",
 ]
 # "Outro" não entra nessa lista: é só uma opção de formulário que libera um
 # campo de texto livre (routes/equipamentos.py). Nunca é um valor salvo no banco.
 
 # Categorias em que o equipamento normalmente vem com serial de fábrica —
 # nessas, o campo "Número de série" passa a ser obrigatório no cadastro.
-# Periférico, Cabo e categorias customizadas ("Outro") continuam opcionais,
+# Acessório e categorias customizadas ("Outro") continuam opcionais,
 # pois nem sempre têm um serial de fato.
 CATEGORIAS_COM_SERIAL_OBRIGATORIO = [
     "Notebook",
+    "Desktop",
     "Monitor",
+    "Handheld",
     "Impressora",
-    "Coletor de Dados",
-    "Leitor/Scanner",
 ]
 
 STATUS_OPCOES = [
     "Disponível",
+    "Reservado",
     "Em uso",
-    "Manutenção",
+    "Em manutenção",
     "Baixado",
 ]
 
 LOCAIS_ARMAZENAMENTO = [
+    "Estoque principal",
+    "Melihelp",
+    "Bancada",
     "Operação",
-    "Meli-help Is",
-    "Estoque TI G200",
 ]
 
 # Reflete se o cadastro deste equipamento no Arturito (sistema interno usado
@@ -61,8 +62,9 @@ STATUS_ARTURITO_OPCOES = [
 
 _STATUS_SLUGS = {
     "Disponível": "disponivel",
+    "Reservado": "reservado",
     "Em uso": "em-uso",
-    "Manutenção": "manutencao",
+    "Em manutenção": "em-manutencao",
     "Baixado": "baixado",
 }
 
@@ -74,9 +76,10 @@ def status_slug(status):
 
 _STATUS_DESCRICOES = {
     "Disponível": "Pronto para uso, ninguém está com ele agora",
+    "Reservado": "Separado para alguém ou algum uso específico, mas ainda não entregue",
     "Em uso": "Alocado a alguém neste momento",
-    "Manutenção": "Em conserto ou revisão",
-    "Baixado": "Fora de uso — descartado ou removido do estoque",
+    "Em manutenção": "Em conserto ou revisão",
+    "Baixado": "Fora de uso, descartado ou removido do estoque",
 }
 
 
