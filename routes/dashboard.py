@@ -30,10 +30,12 @@ def dashboard():
     status_labels += sorted(s for s in mapa_status if s not in STATUS_OPCOES)
     status_valores = [int(mapa_status[s]) for s in status_labels]
 
-    # Evolução de cadastros: nº de registros criados por dia
+    # Evolução de cadastros: nº de registros criados por dia.
+    # func.date() é suportada tanto por SQLite quanto por Postgres, ao
+    # contrário de func.strftime() (exclusiva do SQLite, quebra em produção).
     evolucao = (
         db.session.query(
-            func.strftime("%Y-%m-%d", Equipamento.data_registro).label("dia"),
+            func.date(Equipamento.data_registro).label("dia"),
             func.count(Equipamento.id),
         )
         .group_by("dia")
@@ -49,6 +51,6 @@ def dashboard():
         categorias_valores=[int(v) for _, v in por_categoria],
         status_labels=status_labels,
         status_valores=status_valores,
-        evolucao_labels=[d for d, _ in evolucao],
+        evolucao_labels=[str(d) for d, _ in evolucao],
         evolucao_valores=[int(v) for _, v in evolucao],
     )
