@@ -4,7 +4,7 @@ from flask import Flask, render_template
 from flask_wtf import CSRFProtect
 
 from config import Config, DB_DIR
-from models import db, status_descricao, status_slug
+from models import db, normalizar_seriais_existentes, status_descricao, status_slug
 
 csrf = CSRFProtect()
 
@@ -49,6 +49,27 @@ def create_app():
         return render_template("erro.html", codigo=500,
                                titulo="Algo deu errado",
                                mensagem="Ocorreu um erro inesperado. Tente novamente em alguns instantes."), 500
+
+    @app.cli.command("normalizar-seriais")
+    def normalizar_seriais_cli():
+        """Remove o ".0" residual de seriais numéricos já salvos no banco
+        (sobra de cópia/cola de planilha). Roda uma vez contra o banco
+        configurado em DATABASE_URL; executar de novo não faz nada se não
+        houver mais nada a corrigir."""
+        resultado = normalizar_seriais_existentes()
+        print(f"Seriais corrigidos: {len(resultado['corrigidos'])}")
+        for item in resultado["corrigidos"]:
+            print(f"  id={item['id']}: {item['original']!r} -> {item['novo']!r}")
+
+        if resultado["colisoes"]:
+            print(f"\nColisões que precisam de revisão manual ({len(resultado['colisoes'])}):")
+            for item in resultado["colisoes"]:
+                print(
+                    f"  id={item['id']}: {item['original']!r} -> {item['proposto']!r} "
+                    f"colide com o(s) equipamento(s) {item['colide_com']}"
+                )
+        else:
+            print("Nenhuma colisão encontrada.")
 
     @app.after_request
     def aplicar_headers_seguranca(resposta):

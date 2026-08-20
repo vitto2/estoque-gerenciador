@@ -7,11 +7,29 @@ individual. Ex.: um registro pode representar "5 notebooks Dell,
 status Disponível" e outro "2 notebooks Dell, status Manutenção".
 Dá pra evoluir para rastreio unitário depois, se precisar.
 """
+import re
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
+
+# Quando um serial puramente numérico é copiado de uma planilha (Excel/
+# Sheets guardam números como float, e o texto colado vem com essa
+# terminação), sobra um ".0" no final que nunca faz parte do serial real.
+_SERIAL_COM_SUFIXO_FLOAT = re.compile(r"^(\d+)\.0+$")
+
+
+def normalizar_serial(serial):
+    """Remove o ".0" residual de um serial numérico colado de planilha.
+    Usado tanto na entrada (formulário, lote, extração por foto) quanto
+    como validador do modelo, pra nenhum caminho de escrita deixar passar."""
+    if not serial:
+        return serial
+    serial = serial.strip()
+    match = _SERIAL_COM_SUFIXO_FLOAT.match(serial)
+    return match.group(1) if match else serial
 
 # Opções usadas nos formulários e filtros. Concentradas aqui pra
 # facilitar manutenção (adicionar/remover categoria = editar 1 lista).
@@ -107,6 +125,10 @@ class Equipamento(db.Model):
     def __repr__(self):
         return f"<Equipamento {self.id} {self.fabricante} {self.modelo} ({self.categoria}) - {self.status}>"
 
+    @validates("serial")
+    def _validar_serial(self, key, value):
+        return normalizar_serial(value)
+
     @property
     def status_slug(self):
         """Versão sem acento/espaço do status, pra usar como classe CSS."""
@@ -124,3 +146,48 @@ class Equipamento(db.Model):
             "tecnico_responsavel": self.tecnico_responsavel,
             "status": self.status,
         }
+
+
+def normalizar_seriais_existentes(sessao=None):
+    """Corrige, em lote, os seriais já salvos que ficaram com um ".0" no
+    final (ver normalizar_serial) — usado pelo comando `flask normalizar-seriais`
+    para arrumar dados que entraram assim antes dessa validação existir.
+
+    Não aplica a correção quando ela colidiria com outro serial já
+    existente (ou com outro equipamento que precisaria da mesma correção)
+    — esses casos ficam fora da lista de "corrigidos" e voltam em
+    "colisoes" para revisão manual, já que decidir qual dos dois é o
+    registro certo exige contexto que o código não tem.
+    """
+    sessao = sessao or db.session
+    equipamentos = Equipamento.query.filter(Equipamento.serial.isnot(None)).all()
+
+    propostas = {e.id: normalizar_serial(e.serial) for e in equipamentos}
+    por_chave = {}
+    for equip_id, novo_serial in propostas.items():
+        por_chave.setdefault(novo_serial.lower(), []).append(equip_id)
+
+    corrigidos = []
+    colisoes = []
+
+    for equip in equipamentos:
+        original = equip.serial
+        novo = propostas[equip.id]
+        if novo == original:
+            continue
+
+        ids_na_mesma_chave = por_chave[novo.lower()]
+        if len(ids_na_mesma_chave) > 1:
+            colisoes.append({
+                "id": equip.id,
+                "original": original,
+                "proposto": novo,
+                "colide_com": [i for i in ids_na_mesma_chave if i != equip.id],
+            })
+            continue
+
+        equip.serial = novo
+        corrigidos.append({"id": equip.id, "original": original, "novo": novo})
+
+    sessao.commit()
+    return {"corrigidos": corrigidos, "colisoes": colisoes}

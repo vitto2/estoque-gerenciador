@@ -8,7 +8,7 @@ from exportacao import gerar_planilha_equipamentos
 from extracao_serial import ExtracaoFalhou, ExtracaoIndisponivel, extrair_serial_da_imagem
 from models import (
     CATEGORIAS, CATEGORIAS_COM_SERIAL_OBRIGATORIO, LOCAIS_ARMAZENAMENTO, STATUS_ARTURITO_OPCOES,
-    STATUS_OPCOES, Equipamento, db, status_slug,
+    STATUS_OPCOES, Equipamento, db, normalizar_serial, status_slug,
 )
 
 equipamentos_bp = Blueprint("equipamentos", __name__, url_prefix="/equipamentos")
@@ -111,7 +111,7 @@ def _validar_dados(form, item_id=None):
     except (TypeError, ValueError):
         erros.append("Quantidade deve ser um número inteiro maior que zero.")
 
-    serial = (form.get("serial") or "").strip() or None
+    serial = normalizar_serial((form.get("serial") or "").strip()) or None
     if not serial and categoria in CATEGORIAS_COM_SERIAL_OBRIGATORIO:
         erros.append(f'Informe o número de série — obrigatório para a categoria "{categoria}".')
     if serial:
@@ -247,6 +247,7 @@ def extrair_serial():
     except ExtracaoFalhou as erro:
         return jsonify({"erro": str(erro)}), 502
 
+    serial = normalizar_serial(serial)
     if not serial:
         return jsonify({"serial": None, "mensagem": "Não encontrei um número de série legível nessa foto."})
 
@@ -263,7 +264,10 @@ def lote():
             categoria = (request.form.get("categoria_customizada") or "").strip()
         tecnico = (request.form.get("tecnico_responsavel") or "").strip()
         status = (request.form.get("status") or "").strip()
-        seriais_raw = request.form.getlist("serial")
+        # Normalizado já na entrada: seriais colados de uma planilha às vezes
+        # vêm com ".0" no final (Excel/Sheets guardam número como float), e
+        # isso precisa desaparecer antes de comparar ou exibir de volta.
+        seriais_raw = [normalizar_serial(s) for s in request.form.getlist("serial")]
 
         local = (request.form.get("local_armazenamento") or "").strip() or None
         observacoes = (request.form.get("observacoes") or "").strip() or None
@@ -285,7 +289,7 @@ def lote():
         if status_arturito and status_arturito not in STATUS_ARTURITO_OPCOES:
             erros.append("Selecione um status do Arturito válido.")
 
-        seriais = [s.strip() for s in seriais_raw if s.strip()]
+        seriais = [s for s in seriais_raw if s]
         if not seriais:
             erros.append("Adicione pelo menos um número de série.")
 
