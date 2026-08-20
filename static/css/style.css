@@ -587,6 +587,176 @@ a:hover { text-decoration: underline; }
 
 .etiqueta-extraida-preview { margin-top: 10px; }
 
+/* ── LISTAGEM AGRUPADA POR MODELO ────────────────────────────────────────── */
+.lista-grupos-modelo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--raio-painel);
+    overflow: hidden;
+}
+
+.grupo-modelo-linha {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    transition: background var(--transition);
+}
+.grupo-modelo-linha:last-child { border-bottom: none; }
+.grupo-modelo-linha:hover { background: var(--gelo); text-decoration: none; color: var(--text); }
+
+.grupo-modelo-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+.grupo-modelo-categoria {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-light);
+}
+
+.grupo-modelo-titulo {
+    font-family: var(--fonte-display);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+}
+
+.grupo-modelo-sub { font-size: 12.5px; color: var(--text-secondary); }
+
+.grupo-modelo-metrica {
+    flex-shrink: 0;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.grupo-modelo-numero {
+    font-family: var(--fonte-display);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--text);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.grupo-modelo-numero-label {
+    font-size: 11px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.grupo-modelo-seta { flex-shrink: 0; color: var(--text-light); }
+
+/* ── LISTAGEM DE SERIAIS DE UM MODELO ────────────────────────────────────── */
+.link-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+.link-voltar:hover { color: var(--text); }
+
+.filtros-inline {
+    margin-bottom: 20px;
+}
+
+.tabela-serial-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--raio-painel);
+    overflow: hidden;
+}
+
+.tabela-serial {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.tabela-serial th {
+    text-align: left;
+    padding: 12px 18px;
+    background: var(--gelo);
+    color: var(--text-light);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+}
+.tabela-serial td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.tabela-serial tbody tr:last-child td { border-bottom: none; }
+.tabela-serial tbody tr.linha-serial-clicavel {
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.tabela-serial tbody tr.linha-serial-clicavel:hover { background: var(--gelo); }
+
+/* ── MODAL DE DETALHES DO EQUIPAMENTO ────────────────────────────────────── */
+.detalhe-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(23,24,28,0.6);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.detalhe-overlay.aberta { display: flex; }
+
+.detalhe-modal {
+    background: var(--surface);
+    border-radius: var(--raio-flutuante);
+    box-shadow: var(--sombra-lg);
+    width: 100%;
+    max-width: 440px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 28px;
+    position: relative;
+}
+
+.detalhe-fechar { position: absolute; top: 18px; right: 18px; }
+
+.detalhe-campos {
+    margin-top: 18px;
+    border-top: 1px solid var(--border);
+}
+.detalhe-campos .etiqueta-linha-campo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+}
+.detalhe-campos .etiqueta-linha-campo:last-child { border-bottom: none; }
+.detalhe-campos .etiqueta-linha-campo span {
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+}
+.detalhe-campos .etiqueta-linha-campo strong { color: var(--text); font-weight: 600; text-align: right; }
+
+.detalhe-acoes { display: flex; gap: 10px; margin-top: 20px; }
+.detalhe-acoes .btn { flex: 1; }
+
 /* ── PAGE HEADER ────────────────────────────────────────────────────────── */
 .page-header {
     display: flex;
@@ -1912,6 +2082,64 @@ button:focus-visible,
        gigante quando há muitos equipamentos cadastrados. */
     .tabela-estoque td.detalhe-mobile { display: none; }
     .tabela-estoque tbody tr.expandido td.detalhe-mobile { display: flex; }
+
+    /* Grupos por modelo: linhas mais compactas no mobile */
+    .grupo-modelo-linha { padding: 13px 16px; gap: var(--sp-3, 10px); }
+    .grupo-modelo-titulo { font-size: 15px; }
+    .grupo-modelo-numero { font-size: 22px; }
+
+    /* Listagem por modelo tem só 2 filtros: não precisa virar bottom sheet */
+    .filtros-inline {
+        position: static;
+        transform: none;
+        box-shadow: none;
+        border-radius: var(--raio-painel);
+        max-height: none;
+        overflow: visible;
+        border: 1px solid var(--border);
+        padding: 16px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filtros-inline .filtro-campo { min-width: 100%; }
+    .filtros-inline .filtro-acoes { margin-left: 0; width: 100%; }
+
+    /* Tabela de seriais vira lista de cartões no mobile, sem rolagem horizontal */
+    .tabela-serial-wrapper { background: transparent; border: none; border-radius: 0; overflow: visible; }
+    .tabela-serial thead { display: none; }
+    .tabela-serial, .tabela-serial tbody, .tabela-serial tr, .tabela-serial td {
+        display: block;
+        width: 100%;
+    }
+    .tabela-serial tbody tr {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--raio-painel);
+        padding: 4px 14px;
+        margin-bottom: 10px;
+    }
+    .tabela-serial td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        text-align: right;
+    }
+    .tabela-serial td:last-child { border-bottom: none; }
+    .tabela-serial td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-light);
+        text-align: left;
+        flex-shrink: 0;
+    }
+
+    .detalhe-modal { padding: 22px; max-height: 82vh; }
 
     .tabela-estoque td.td-resumo-mobile {
         border-bottom: none;

@@ -175,6 +175,8 @@ def _filtros_atuais():
         "categoria": request.args.get("categoria", "").strip(),
         "status": request.args.get("status", "").strip(),
         "tecnico": request.args.get("tecnico", "").strip(),
+        "fabricante": request.args.get("fabricante", "").strip(),
+        "modelo": request.args.get("modelo", "").strip(),
     }
 
 
@@ -185,6 +187,10 @@ def _aplicar_filtros(query, filtros):
         query = query.filter(Equipamento.status == filtros["status"])
     if filtros["tecnico"]:
         query = query.filter(Equipamento.tecnico_responsavel == filtros["tecnico"])
+    if filtros.get("fabricante"):
+        query = query.filter(Equipamento.fabricante == filtros["fabricante"])
+    if filtros.get("modelo"):
+        query = query.filter(Equipamento.modelo == filtros["modelo"])
     return query
 
 
@@ -432,15 +438,6 @@ def saida():
 @equipamentos_bp.route("/")
 def listagem():
     filtros = _filtros_atuais()
-    query = _aplicar_filtros(Equipamento.query, filtros)
-    query = query.order_by(Equipamento.data_registro.desc())
-
-    pagina = request.args.get("pagina", 1, type=int)
-    if pagina < 1:
-        pagina = 1
-    paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
-    if paginacao.pages and pagina > paginacao.pages:
-        paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
 
     # Mostra a Etiqueta do que acabou de ser cadastrado (aparece uma única
     # vez, logo após o redirect do cadastro/lote — não é persistido).
@@ -449,11 +446,65 @@ def listagem():
     if ultimo_cadastro_id:
         ultimo_cadastro = Equipamento.query.get(ultimo_cadastro_id)
 
+    # Com fabricante+modelo selecionados: lista os seriais daquele modelo.
+    if filtros["fabricante"] and filtros["modelo"]:
+        query = _aplicar_filtros(Equipamento.query, filtros)
+        query = query.order_by(Equipamento.data_registro.desc())
+
+        pagina = request.args.get("pagina", 1, type=int)
+        if pagina < 1:
+            pagina = 1
+        paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+        if paginacao.pages and pagina > paginacao.pages:
+            paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
+
+        return render_template(
+            "listagem_modelo.html",
+            itens=paginacao.items,
+            total_itens=paginacao.total,
+            paginacao=paginacao,
+            status_opcoes=STATUS_OPCOES,
+            tecnicos_existentes=get_tecnicos_existentes(),
+            filtro_status=filtros["status"],
+            filtro_tecnico=filtros["tecnico"],
+            filtro_fabricante=filtros["fabricante"],
+            filtro_modelo=filtros["modelo"],
+            ultimo_cadastro=ultimo_cadastro,
+        )
+
+    # Visão padrão: um card por modelo, agrupando os equipamentos —
+    # evita listar centenas de linhas individuais quando há muitas
+    # unidades do mesmo modelo cadastradas.
+    query = _aplicar_filtros(Equipamento.query, filtros)
+    grupos_query = (
+        query.with_entities(
+            Equipamento.fabricante,
+            Equipamento.modelo,
+            Equipamento.categoria,
+            db.func.count(Equipamento.id).label("registros"),
+            db.func.sum(Equipamento.quantidade).label("unidades"),
+        )
+        .group_by(Equipamento.fabricante, Equipamento.modelo, Equipamento.categoria)
+        .order_by(Equipamento.fabricante, Equipamento.modelo)
+    )
+
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    paginacao = grupos_query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+    if paginacao.pages and pagina > paginacao.pages:
+        paginacao = grupos_query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
+
+    total_registros = query.count()
+    total_itens = query.with_entities(db.func.sum(Equipamento.quantidade)).scalar() or 0
+
     return render_template(
         "listagem.html",
-        itens=paginacao.items,
-        total_itens=paginacao.total,
+        grupos=paginacao.items,
         paginacao=paginacao,
+        total_grupos=paginacao.total,
+        total_registros=total_registros,
+        total_itens=int(total_itens),
         categorias=get_categorias_disponiveis(),
         status_opcoes=STATUS_OPCOES,
         tecnicos_existentes=get_tecnicos_existentes(),

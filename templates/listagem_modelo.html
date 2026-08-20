@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}{{ filtro_fabricante }} {{ filtro_modelo }} — Estoque de TI{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('equipamentos.listagem') }}" class="link-voltar">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar para modelos
+</a>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>{{ filtro_fabricante }} {{ filtro_modelo }}</h1>
+        <p class="page-subtitle">Clique num equipamento para ver todos os detalhes</p>
+    </div>
+    <span class="badge-count">
+        {{ total_itens }} equipamento{{ 's' if total_itens != 1 else '' }}
+    </span>
+</div>
+
+{% if ultimo_cadastro %}
+<div class="sucesso-etiqueta-banner">
+    <span class="sucesso-etiqueta-banner-titulo">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Cadastrado agora
+    </span>
+    {{ macros.etiqueta(ultimo_cadastro.fabricante, ultimo_cadastro.modelo, ultimo_cadastro.categoria, ultimo_cadastro.serial, ultimo_cadastro.local_armazenamento, ultimo_cadastro.status, ultimo_cadastro.status_slug, ultimo_cadastro.status_arturito) }}
+</div>
+{% endif %}
+
+<form method="get" class="filtros filtros-inline">
+    <input type="hidden" name="fabricante" value="{{ filtro_fabricante }}">
+    <input type="hidden" name="modelo" value="{{ filtro_modelo }}">
+    <div class="filtro-campo">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">Todos</option>
+            {% for s in status_opcoes %}
+                <option value="{{ s }}" {{ 'selected' if s == filtro_status else '' }}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filtro-campo">
+        <label for="tecnico">Técnico</label>
+        <select name="tecnico" id="tecnico">
+            <option value="">Todos</option>
+            {% for t in tecnicos_existentes %}
+                <option value="{{ t }}" {{ 'selected' if t == filtro_tecnico else '' }}>{{ t }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filtro-acoes">
+        <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Filtrar
+        </button>
+        <a href="{{ url_for('equipamentos.exportar', fabricante=filtro_fabricante, modelo=filtro_modelo, status=filtro_status, tecnico=filtro_tecnico) }}" class="btn btn-exportar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar {{ total_itens }}
+        </a>
+    </div>
+</form>
+
+{% if total_itens %}
+<div class="tabela-serial-wrapper">
+    <table class="tabela-serial">
+        <thead>
+            <tr>
+                <th>Serial</th>
+                <th>Status</th>
+                <th>Local</th>
+                <th>Técnico</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr class="linha-serial-clicavel"
+                data-fabricante="{{ item.fabricante }}"
+                data-modelo="{{ item.modelo }}"
+                data-categoria="{{ item.categoria }}"
+                data-serial="{{ item.serial or '' }}"
+                data-local="{{ item.local_armazenamento or '' }}"
+                data-status="{{ item.status }}"
+                data-status-slug="{{ item.status_slug }}"
+                data-status-arturito="{{ item.status_arturito or '' }}"
+                data-quantidade="{{ item.quantidade }}"
+                data-tecnico="{{ item.tecnico_responsavel }}"
+                data-observacoes="{{ item.observacoes or '' }}"
+                data-data-registro="{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}"
+                data-editar-url="{{ url_for('equipamentos.editar', item_id=item.id) }}"
+                data-excluir-url="{{ url_for('equipamentos.excluir', item_id=item.id) }}">
+                <td data-label="Serial">
+                    {% if item.serial %}<span class="item-serial">{{ item.serial }}</span>{% else %}<span class="item-sem-serial">sem serial</span>{% endif %}
+                </td>
+                <td data-label="Status"><span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span></td>
+                <td data-label="Local">{{ item.local_armazenamento or '—' }}</td>
+                <td data-label="Técnico">{{ item.tecnico_responsavel }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if paginacao.pages > 1 %}
+<div class="paginacao">
+    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo, pagina=paginacao.prev_num, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
+       class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_prev else '' }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <span class="btn-pagina-texto">Anterior</span>
+    </a>
+    <span class="paginacao-info">Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
+    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo, pagina=paginacao.next_num, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
+       class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_next else '' }}">
+        <span class="btn-pagina-texto">Próxima</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+</div>
+{% endif %}
+
+{% else %}
+<div class="estado-vazio">
+    <span class="estado-vazio-icon">📦</span>
+    <h3>Nenhum equipamento com esses filtros</h3>
+    <p>Tente remover algum filtro para ver os equipamentos deste modelo.</p>
+    <a href="{{ url_for('equipamentos.listagem', fabricante=filtro_fabricante, modelo=filtro_modelo) }}" class="btn btn-secundario">Limpar filtros</a>
+</div>
+{% endif %}
+
+{# ── Modal de detalhes do equipamento ─────────────────────────────────── #}
+<div class="detalhe-overlay" id="detalhe-overlay" aria-hidden="true">
+    <div class="detalhe-modal" role="dialog" aria-modal="true">
+        <button type="button" class="onboarding-fechar detalhe-fechar" id="detalhe-fechar" aria-label="Fechar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <div class="etiqueta-brba" id="detalhe-etiqueta">
+            <div class="etiqueta-brba-faixa"></div>
+            <div class="etiqueta-brba-corpo">
+                <div class="etiqueta-brba-topo">
+                    <span class="etiqueta-brba-categoria" id="detalhe-categoria"></span>
+                    <span class="etiqueta-brba-codigo">BRBA01</span>
+                </div>
+                <div class="etiqueta-brba-titulo" id="detalhe-titulo"></div>
+                <div class="etiqueta-brba-linha">
+                    <span class="etiqueta-brba-serial" id="detalhe-serial"></span>
+                    <span class="status-badge" id="detalhe-status"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detalhe-campos" id="detalhe-campos"></div>
+
+        <div class="detalhe-acoes">
+            <a href="#" class="btn btn-secundario" id="detalhe-editar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+            </a>
+            <button type="button" class="btn btn-secundario btn-abrir-exclusao" id="detalhe-excluir">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const overlay = document.getElementById('detalhe-overlay');
+    const modal = overlay.querySelector('.detalhe-modal');
+    const campos = document.getElementById('detalhe-campos');
+    const temGsap = typeof window.gsap !== 'undefined'
+        && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    function campo(label, valor) {
+        return '<div class="etiqueta-linha-campo"><span>' + label + '</span><strong>' + (valor || '—') + '</strong></div>';
+    }
+
+    function abrir(linha) {
+        const d = linha.dataset;
+        document.getElementById('detalhe-categoria').textContent = d.categoria;
+        document.getElementById('detalhe-titulo').textContent = d.fabricante + ' ' + d.modelo;
+        document.getElementById('detalhe-serial').textContent = d.serial || 'sem serial';
+        const statusEl = document.getElementById('detalhe-status');
+        statusEl.textContent = d.status;
+        statusEl.className = 'status-badge status-' + d.statusSlug;
+
+        campos.innerHTML =
+            campo('Quantidade', d.quantidade) +
+            campo('Local de armazenamento', d.local) +
+            campo('Status no Arturito', d.statusArturito) +
+            campo('Técnico responsável', d.tecnico) +
+            campo('Registrado em', d.dataRegistro) +
+            campo('Observações', d.observacoes);
+
+        document.getElementById('detalhe-editar').href = d.editarUrl;
+        const btnExcluir = document.getElementById('detalhe-excluir');
+        btnExcluir.dataset.action = d.excluirUrl;
+        btnExcluir.dataset.fabricante = d.fabricante;
+        btnExcluir.dataset.modelo = d.modelo;
+        btnExcluir.dataset.categoria = d.categoria;
+        btnExcluir.dataset.serial = d.serial;
+        btnExcluir.dataset.local = d.local;
+        btnExcluir.dataset.status = d.status;
+        btnExcluir.dataset.statusSlug = d.statusSlug;
+
+        overlay.classList.add('aberta');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (temGsap) {
+            gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+            gsap.fromTo(modal, { opacity: 0, y: 16, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power3.out' });
+        }
+    }
+
+    function fechar() {
+        overlay.classList.remove('aberta');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.linha-serial-clicavel').forEach(function (linha) {
+        linha.addEventListener('click', function () { abrir(linha); });
+    });
+    document.getElementById('detalhe-fechar').addEventListener('click', fechar);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) fechar(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('aberta')) fechar();
+    });
+    // Excluir dentro do modal: fecha o modal de detalhes e deixa o clique
+    // seguir para o listener global de exclusao.js (mesmo evento, fase de bubble).
+    document.getElementById('detalhe-excluir').addEventListener('click', fechar);
+})();
+</script>
+{% endblock %}
