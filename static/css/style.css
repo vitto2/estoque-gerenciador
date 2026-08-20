@@ -779,6 +779,14 @@ a:hover { text-decoration: underline; }
 .page-header-left { display: flex; flex-direction: column; gap: 4px; }
 .page-subtitle { font-size: 13.5px; color: var(--text-secondary); margin: 0; font-weight: 500; }
 
+.page-header-acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Busca instantânea: opacidade discreta enquanto o fragmento é buscado,
+   sem travar a tela nem exigir spinner — a resposta chega em geral em
+   poucos milissegundos. */
+#conteudo-listagem { transition: opacity 0.15s ease; }
+#conteudo-listagem.carregando { opacity: 0.55; }
+
 .badge-count {
     background: var(--ml-blue-light);
     color: var(--ml-blue-dark);

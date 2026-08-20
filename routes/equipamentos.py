@@ -438,6 +438,74 @@ def saida():
                            form_observacoes="", form_status="Em uso", form_texto="")
 
 
+def _montar_contexto_listagem(filtros):
+    """Monta o contexto da área de resultados da listagem — agrupada por
+    modelo, ou os equipamentos batendo com uma busca por serial. Usado
+    tanto pela página completa quanto pelo fragmento buscado via AJAX
+    conforme o usuário digita no campo de busca (busca instantânea)."""
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+
+    if filtros["busca"]:
+        # Busca por serial: ignora o agrupamento por modelo e mostra os
+        # equipamentos correspondentes diretamente, já que o objetivo aqui
+        # é achar um item específico, não navegar por modelo.
+        query = _aplicar_filtros(Equipamento.query, filtros)
+        query = query.order_by(Equipamento.data_registro.desc())
+
+        paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+        if paginacao.pages and pagina > paginacao.pages:
+            paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
+
+        return {
+            "modo": "busca",
+            "itens": paginacao.items,
+            "total_itens": paginacao.total,
+            "paginacao": paginacao,
+            "filtro_categoria": filtros["categoria"],
+            "filtro_status": filtros["status"],
+            "filtro_tecnico": filtros["tecnico"],
+            "filtro_busca": filtros["busca"],
+        }
+
+    # Visão padrão: um card por modelo, agrupando os equipamentos —
+    # evita listar centenas de linhas individuais quando há muitas
+    # unidades do mesmo modelo cadastradas.
+    query = _aplicar_filtros(Equipamento.query, filtros)
+    grupos_query = (
+        query.with_entities(
+            Equipamento.fabricante,
+            Equipamento.modelo,
+            Equipamento.categoria,
+            db.func.count(Equipamento.id).label("registros"),
+            db.func.sum(Equipamento.quantidade).label("unidades"),
+        )
+        .group_by(Equipamento.fabricante, Equipamento.modelo, Equipamento.categoria)
+        .order_by(Equipamento.fabricante, Equipamento.modelo)
+    )
+
+    paginacao = grupos_query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
+    if paginacao.pages and pagina > paginacao.pages:
+        paginacao = grupos_query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
+
+    total_registros = query.count()
+    total_itens = query.with_entities(db.func.sum(Equipamento.quantidade)).scalar() or 0
+
+    return {
+        "modo": "grupos",
+        "grupos": paginacao.items,
+        "paginacao": paginacao,
+        "total_grupos": paginacao.total,
+        "total_registros": total_registros,
+        "total_itens": int(total_itens),
+        "filtro_categoria": filtros["categoria"],
+        "filtro_status": filtros["status"],
+        "filtro_tecnico": filtros["tecnico"],
+        "filtro_busca": filtros["busca"],
+    }
+
+
 @equipamentos_bp.route("/")
 def listagem():
     filtros = _filtros_atuais()
@@ -475,76 +543,26 @@ def listagem():
             ultimo_cadastro=ultimo_cadastro,
         )
 
-    # Busca por serial: ignora o agrupamento por modelo e mostra os
-    # equipamentos correspondentes diretamente, já que o objetivo aqui é
-    # achar um item específico, não navegar por modelo.
-    if filtros["busca"]:
-        query = _aplicar_filtros(Equipamento.query, filtros)
-        query = query.order_by(Equipamento.data_registro.desc())
-
-        pagina = request.args.get("pagina", 1, type=int)
-        if pagina < 1:
-            pagina = 1
-        paginacao = query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
-        if paginacao.pages and pagina > paginacao.pages:
-            paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
-
-        return render_template(
-            "listagem_busca.html",
-            itens=paginacao.items,
-            total_itens=paginacao.total,
-            paginacao=paginacao,
-            categorias=get_categorias_disponiveis(),
-            status_opcoes=STATUS_OPCOES,
-            tecnicos_existentes=get_tecnicos_existentes(),
-            filtro_categoria=filtros["categoria"],
-            filtro_status=filtros["status"],
-            filtro_tecnico=filtros["tecnico"],
-            filtro_busca=filtros["busca"],
-            ultimo_cadastro=ultimo_cadastro,
-        )
-
-    # Visão padrão: um card por modelo, agrupando os equipamentos —
-    # evita listar centenas de linhas individuais quando há muitas
-    # unidades do mesmo modelo cadastradas.
-    query = _aplicar_filtros(Equipamento.query, filtros)
-    grupos_query = (
-        query.with_entities(
-            Equipamento.fabricante,
-            Equipamento.modelo,
-            Equipamento.categoria,
-            db.func.count(Equipamento.id).label("registros"),
-            db.func.sum(Equipamento.quantidade).label("unidades"),
-        )
-        .group_by(Equipamento.fabricante, Equipamento.modelo, Equipamento.categoria)
-        .order_by(Equipamento.fabricante, Equipamento.modelo)
-    )
-
-    pagina = request.args.get("pagina", 1, type=int)
-    if pagina < 1:
-        pagina = 1
-    paginacao = grupos_query.paginate(page=pagina, per_page=ITENS_POR_PAGINA, error_out=False)
-    if paginacao.pages and pagina > paginacao.pages:
-        paginacao = grupos_query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
-
-    total_registros = query.count()
-    total_itens = query.with_entities(db.func.sum(Equipamento.quantidade)).scalar() or 0
-
+    contexto = _montar_contexto_listagem(filtros)
     return render_template(
         "listagem.html",
-        grupos=paginacao.items,
-        paginacao=paginacao,
-        total_grupos=paginacao.total,
-        total_registros=total_registros,
-        total_itens=int(total_itens),
         categorias=get_categorias_disponiveis(),
         status_opcoes=STATUS_OPCOES,
         tecnicos_existentes=get_tecnicos_existentes(),
-        filtro_categoria=filtros["categoria"],
-        filtro_status=filtros["status"],
-        filtro_tecnico=filtros["tecnico"],
         ultimo_cadastro=ultimo_cadastro,
+        **contexto,
     )
+
+
+@equipamentos_bp.route("/fragmento")
+def listagem_fragmento():
+    """Devolve só a área de resultados (cabeçalho + grade/tabela +
+    paginação) da listagem, em HTML, para a busca instantânea — o
+    JavaScript troca o conteúdo da página sem recarregar enquanto o
+    usuário digita no campo de busca por serial."""
+    filtros = _filtros_atuais()
+    contexto = _montar_contexto_listagem(filtros)
+    return render_template("_fragmento_listagem.html", **contexto)
 
 
 @equipamentos_bp.route("/novo", methods=["GET", "POST"])

@@ -1,0 +1,169 @@
+{% import "_macros.html" as macros %}
+<div id="conteudo-listagem-interior"
+     data-modo="{{ modo }}"
+     data-total-itens="{{ total_itens }}"
+     data-busca="{{ filtro_busca or '' }}"
+     data-export-url="{{ url_for('equipamentos.exportar', busca=filtro_busca, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}">
+
+    {% if modo == 'busca' %}
+    <a href="{{ url_for('equipamentos.listagem', categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}" class="link-voltar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Voltar para modelos
+    </a>
+    {% endif %}
+
+    <div class="page-header">
+        <div class="page-header-left">
+            {% if modo == 'busca' %}
+                <h1>Busca por “{{ filtro_busca }}”</h1>
+                <p class="page-subtitle">Clique num equipamento para ver todos os detalhes</p>
+            {% else %}
+                <h1>Estoque de equipamentos</h1>
+                <p class="page-subtitle">Agrupado por modelo — clique num modelo para ver os equipamentos individuais</p>
+            {% endif %}
+        </div>
+        <div class="page-header-acoes">
+            <span class="badge-count">
+                {% if modo == 'busca' %}
+                    {{ total_itens }} resultado{{ 's' if total_itens != 1 else '' }}
+                {% else %}
+                    {{ total_itens }} unidade{{ 's' if total_itens != 1 else '' }} · {{ total_grupos }} modelo{{ 's' if total_grupos != 1 else '' }}
+                {% endif %}
+            </span>
+            <a href="{{ url_for('equipamentos.exportar', busca=filtro_busca, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}" class="btn btn-exportar" id="link-exportar-listagem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar {{ total_itens }}
+            </a>
+        </div>
+    </div>
+
+    {% if ultimo_cadastro %}
+    <div class="sucesso-etiqueta-banner">
+        <span class="sucesso-etiqueta-banner-titulo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Cadastrado agora
+        </span>
+        {{ macros.etiqueta(ultimo_cadastro.fabricante, ultimo_cadastro.modelo, ultimo_cadastro.categoria, ultimo_cadastro.serial, ultimo_cadastro.local_armazenamento, ultimo_cadastro.status, ultimo_cadastro.status_slug, ultimo_cadastro.status_arturito) }}
+    </div>
+    {% endif %}
+
+    {% if modo == 'grupos' %}
+        {% if total_grupos %}
+        <div class="lista-grupos-modelo">
+            {% for grupo in grupos %}
+            <a href="{{ url_for('equipamentos.listagem', fabricante=grupo.fabricante, modelo=grupo.modelo, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) }}"
+               class="grupo-modelo-linha">
+                <div class="grupo-modelo-info">
+                    <span class="grupo-modelo-categoria">{{ grupo.categoria }}</span>
+                    <span class="grupo-modelo-titulo">{{ grupo.fabricante }} {{ grupo.modelo }}</span>
+                    <span class="grupo-modelo-sub">{{ grupo.registros }} registro{{ 's' if grupo.registros != 1 else '' }}</span>
+                </div>
+                <div class="grupo-modelo-metrica">
+                    <span class="grupo-modelo-numero">{{ grupo.unidades }}</span>
+                    <span class="grupo-modelo-numero-label">unidade{{ 's' if grupo.unidades != 1 else '' }}</span>
+                </div>
+                <svg class="grupo-modelo-seta" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if paginacao.pages > 1 %}
+        <div class="paginacao">
+            <a href="{{ url_for('equipamentos.listagem', pagina=paginacao.prev_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
+               class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_prev else '' }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                <span class="btn-pagina-texto">Anterior</span>
+            </a>
+            <span class="paginacao-info">Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
+            <a href="{{ url_for('equipamentos.listagem', pagina=paginacao.next_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
+               class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_next else '' }}">
+                <span class="btn-pagina-texto">Próxima</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="estado-vazio">
+            <span class="estado-vazio-icon">📦</span>
+            {% if filtro_categoria or filtro_status or filtro_tecnico %}
+                <h3>Nenhum resultado com esses filtros</h3>
+                <p>Tente remover algum filtro para ver mais equipamentos.</p>
+                <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar filtros</a>
+            {% else %}
+                <h3>Seu estoque está vazio</h3>
+                <p>Cadastre o primeiro equipamento para começar a organizar seu estoque.</p>
+                <a href="{{ url_for('equipamentos.novo') }}" class="btn btn-primary">Cadastrar primeiro equipamento</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+        {% if total_itens %}
+        <div class="tabela-serial-wrapper">
+            <table class="tabela-serial">
+                <thead>
+                    <tr>
+                        <th>Serial</th>
+                        <th>Modelo</th>
+                        <th>Status</th>
+                        <th>Local</th>
+                        <th>Técnico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                    <tr class="linha-serial-clicavel"
+                        data-fabricante="{{ item.fabricante }}"
+                        data-modelo="{{ item.modelo }}"
+                        data-categoria="{{ item.categoria }}"
+                        data-serial="{{ item.serial or '' }}"
+                        data-local="{{ item.local_armazenamento or '' }}"
+                        data-status="{{ item.status }}"
+                        data-status-slug="{{ item.status_slug }}"
+                        data-status-arturito="{{ item.status_arturito or '' }}"
+                        data-quantidade="{{ item.quantidade }}"
+                        data-tecnico="{{ item.tecnico_responsavel }}"
+                        data-observacoes="{{ item.observacoes or '' }}"
+                        data-data-registro="{{ item.data_registro.strftime('%d/%m/%Y %H:%M') }}"
+                        data-editar-url="{{ url_for('equipamentos.editar', item_id=item.id) }}"
+                        data-excluir-url="{{ url_for('equipamentos.excluir', item_id=item.id) }}">
+                        <td data-label="Serial">
+                            {% if item.serial %}<span class="item-serial">{{ item.serial }}</span>{% else %}<span class="item-sem-serial">sem serial</span>{% endif %}
+                        </td>
+                        <td data-label="Modelo">{{ item.fabricante }} {{ item.modelo }}</td>
+                        <td data-label="Status"><span class="status-badge status-{{ item.status_slug }}">{{ item.status }}</span></td>
+                        <td data-label="Local">{{ item.local_armazenamento or '—' }}</td>
+                        <td data-label="Técnico">{{ item.tecnico_responsavel }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if paginacao.pages > 1 %}
+        <div class="paginacao">
+            <a href="{{ url_for('equipamentos.listagem', busca=filtro_busca, pagina=paginacao.prev_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_prev else '#' }}"
+               class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_prev else '' }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                <span class="btn-pagina-texto">Anterior</span>
+            </a>
+            <span class="paginacao-info">Página {{ paginacao.page }} de {{ paginacao.pages }}</span>
+            <a href="{{ url_for('equipamentos.listagem', busca=filtro_busca, pagina=paginacao.next_num, categoria=filtro_categoria, status=filtro_status, tecnico=filtro_tecnico) if paginacao.has_next else '#' }}"
+               class="btn-pagina {{ 'btn-pagina-desabilitado' if not paginacao.has_next else '' }}">
+                <span class="btn-pagina-texto">Próxima</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="estado-vazio">
+            <span class="estado-vazio-icon">📦</span>
+            <h3>Nenhum equipamento encontrado</h3>
+            <p>Não achamos nenhum serial com “{{ filtro_busca }}”. Confira a grafia ou tente outro trecho.</p>
+            <a href="{{ url_for('equipamentos.listagem') }}" class="btn btn-secundario">Limpar busca</a>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>

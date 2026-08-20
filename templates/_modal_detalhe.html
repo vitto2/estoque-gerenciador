@@ -90,8 +90,12 @@
         document.body.style.overflow = '';
     }
 
-    document.querySelectorAll('.linha-serial-clicavel').forEach(function (linha) {
-        linha.addEventListener('click', function () { abrir(linha); });
+    // Delegação de evento (em vez de um listener por linha): assim as
+    // linhas trocadas pela busca instantânea (fetch + innerHTML) já
+    // funcionam sem precisar religar nada depois de cada troca.
+    document.addEventListener('click', function (e) {
+        var linha = e.target.closest('.linha-serial-clicavel');
+        if (linha) abrir(linha);
     });
     document.getElementById('detalhe-fechar').addEventListener('click', fechar);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) fechar(); });
