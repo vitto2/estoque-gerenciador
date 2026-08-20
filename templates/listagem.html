@@ -13,6 +13,16 @@
     </span>
 </div>
 
+{% if ultimo_cadastro %}
+<div class="sucesso-etiqueta-banner">
+    <span class="sucesso-etiqueta-banner-titulo">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Cadastrado agora
+    </span>
+    {{ macros.etiqueta(ultimo_cadastro.fabricante, ultimo_cadastro.modelo, ultimo_cadastro.categoria, ultimo_cadastro.serial, ultimo_cadastro.local_armazenamento, ultimo_cadastro.status, ultimo_cadastro.status_slug, ultimo_cadastro.status_arturito) }}
+</div>
+{% endif %}
+
 {% set tem_filtro_ativo = filtro_categoria or filtro_status or filtro_tecnico %}
 <button type="button" class="btn-abrir-filtros" id="btn-abrir-filtros">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>

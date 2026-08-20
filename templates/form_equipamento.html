@@ -91,6 +91,19 @@
             </div>
             <input type="file" id="input-foto-serial" accept="image/*" capture="environment" style="display:none">
             <span class="campo-hint" id="hint-extrair-serial">Preencha só se este equipamento tiver um número de série próprio · ou fotografe a etiqueta</span>
+            <div class="etiqueta-brba etiqueta-extraida-preview" id="etiqueta-extraida" style="display:none;">
+                <div class="etiqueta-brba-faixa"></div>
+                <div class="etiqueta-brba-corpo">
+                    <div class="etiqueta-brba-topo">
+                        <span class="etiqueta-brba-categoria" id="etiqueta-extraida-categoria"></span>
+                        <span class="etiqueta-brba-codigo">BRBA01</span>
+                    </div>
+                    <div class="etiqueta-brba-titulo" id="etiqueta-extraida-titulo"></div>
+                    <div class="etiqueta-brba-linha">
+                        <span class="etiqueta-brba-serial" id="etiqueta-extraida-serial"></span>
+                    </div>
+                </div>
+            </div>
             {% if serial_duplicado_id %}
             <span class="campo-hint campo-hint-erro">
                 Este serial já está em uso.
@@ -224,15 +237,37 @@ ligarBotaoExtrairSerial(
             campo.focus();
             campo.select();
             hint.className = 'campo-hint campo-hint-sucesso';
-            hint.textContent = '✓ Extraído da foto — confira se está correto antes de salvar';
+            hint.textContent = 'Lido da etiqueta — confira antes de salvar';
+            mostrarEtiquetaExtraida(resultado.serial);
         } else if (resultado.status === 'falha') {
             hint.className = 'campo-hint campo-hint-erro';
-            hint.textContent = '⚠ ' + (resultado.mensagem || 'Não encontrei o serial nessa foto. Tente de novo ou digite manualmente.');
+            hint.textContent = (resultado.mensagem || 'Não encontrei o serial nessa foto. Tente de novo ou digite manualmente.');
+            esconderEtiquetaExtraida();
         } else {
             hint.className = 'campo-hint campo-hint-erro';
-            hint.textContent = '⚠ Erro ao enviar a foto. Verifique sua conexão e tente de novo.';
+            hint.textContent = 'Erro ao enviar a foto. Verifique sua conexão e tente de novo.';
+            esconderEtiquetaExtraida();
         }
     }
 );
+
+function mostrarEtiquetaExtraida(serial) {
+    const fabricante = (document.getElementById('fabricante').value || '').trim();
+    const modelo = (document.getElementById('modelo').value || '').trim();
+    const categoriaSelect = document.getElementById('categoria');
+    const categoria = categoriaSelect.value === 'Outro'
+        ? (document.getElementById('categoria_customizada').value || 'Outro')
+        : (categoriaSelect.value || 'Categoria não selecionada');
+
+    document.getElementById('etiqueta-extraida-categoria').textContent = categoria;
+    document.getElementById('etiqueta-extraida-titulo').textContent =
+        (fabricante || modelo) ? (fabricante + ' ' + modelo).trim() : 'Fabricante e modelo ainda não preenchidos';
+    document.getElementById('etiqueta-extraida-serial').textContent = serial;
+    document.getElementById('etiqueta-extraida').style.display = '';
+}
+
+function esconderEtiquetaExtraida() {
+    document.getElementById('etiqueta-extraida').style.display = 'none';
+}
 </script>
 {% endblock %}

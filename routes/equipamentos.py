@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import (
-    Blueprint, current_app, flash, jsonify, redirect, render_template, request, send_file, url_for,
+    Blueprint, current_app, flash, jsonify, redirect, render_template, request, send_file, session, url_for,
 )
 
 from exportacao import gerar_planilha_equipamentos
@@ -309,8 +309,9 @@ def lote():
                 form_data=request.form, seriais=seriais_raw, serial_problemas=list(linhas_com_erro),
             ))
 
+        itens_criados = []
         for serial in seriais:
-            db.session.add(Equipamento(
+            item = Equipamento(
                 fabricante=fabricante,
                 modelo=modelo,
                 categoria=categoria,
@@ -321,8 +322,11 @@ def lote():
                 status_arturito=status_arturito,
                 tecnico_responsavel=tecnico,
                 status=status,
-            ))
+            )
+            db.session.add(item)
+            itens_criados.append(item)
         db.session.commit()
+        session["ultimo_cadastro_id"] = itens_criados[-1].id
         n = len(seriais)
         flash(f'{n} equipamento{"s" if n > 1 else ""} cadastrado{"s" if n > 1 else ""} com sucesso.', "sucesso")
         return redirect(url_for("equipamentos.listagem"))
@@ -438,6 +442,13 @@ def listagem():
     if paginacao.pages and pagina > paginacao.pages:
         paginacao = query.paginate(page=paginacao.pages, per_page=ITENS_POR_PAGINA, error_out=False)
 
+    # Mostra a Etiqueta do que acabou de ser cadastrado (aparece uma única
+    # vez, logo após o redirect do cadastro/lote — não é persistido).
+    ultimo_cadastro = None
+    ultimo_cadastro_id = session.pop("ultimo_cadastro_id", None)
+    if ultimo_cadastro_id:
+        ultimo_cadastro = Equipamento.query.get(ultimo_cadastro_id)
+
     return render_template(
         "listagem.html",
         itens=paginacao.items,
@@ -449,6 +460,7 @@ def listagem():
         filtro_categoria=filtros["categoria"],
         filtro_status=filtros["status"],
         filtro_tecnico=filtros["tecnico"],
+        ultimo_cadastro=ultimo_cadastro,
     )
 
 
@@ -465,6 +477,7 @@ def novo():
         item = Equipamento(**dados)
         db.session.add(item)
         db.session.commit()
+        session["ultimo_cadastro_id"] = item.id
         flash(f'Equipamento "{item.fabricante} {item.modelo}" cadastrado com sucesso.', "sucesso")
         return redirect(url_for("equipamentos.listagem"))
 
