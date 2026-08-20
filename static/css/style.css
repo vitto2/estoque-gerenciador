@@ -755,6 +755,7 @@ textarea:focus {
 .card-resumo[data-status="em-uso"] { border-top-color: var(--azul-eletrico); }
 .card-resumo[data-status="em-manutencao"] { border-top-color: var(--laranja); }
 .card-resumo[data-status="baixado"] { border-top-color: var(--tinta-leve); }
+.card-resumo-alerta { border-top-color: var(--laranja); }
 
 .card-resumo-icon {
     width: 40px;
@@ -773,6 +774,7 @@ textarea:focus {
 .card-resumo[data-status="em-uso"] .card-resumo-icon { background: var(--ml-blue-light); color: var(--azul-eletrico); }
 .card-resumo[data-status="em-manutencao"] .card-resumo-icon { background: var(--laranja-claro); color: var(--laranja); }
 .card-resumo[data-status="baixado"] .card-resumo-icon { background: #F0F0F0; color: #888; }
+.card-resumo-alerta .card-resumo-icon { background: var(--laranja-claro); color: var(--laranja); }
 
 .card-resumo-valor {
     display: block;

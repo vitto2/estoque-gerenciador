@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, render_template
 from flask_wtf import CSRFProtect
 
 from config import Config, DB_DIR
@@ -37,10 +37,6 @@ def create_app():
 
     app.register_blueprint(equipamentos_bp)
     app.register_blueprint(dashboard_bp)
-
-    @app.route("/")
-    def index():
-        return redirect(url_for("dashboard.dashboard"))
 
     @app.errorhandler(404)
     def nao_encontrado(_erro):

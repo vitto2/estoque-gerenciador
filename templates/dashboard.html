@@ -37,44 +37,32 @@
     <div class="card-resumo">
         <div class="card-resumo-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                <path d="M3 21V8l9-6 9 6v13"/><path d="M9 21v-8h6v8"/>
             </svg>
         </div>
-        <span class="card-resumo-valor">{{ total_registros }}</span>
-        <span class="card-resumo-label" title="Cada linha do estoque conta como 1 registro, mesmo que tenha várias unidades">Registros cadastrados</span>
+        <span class="card-resumo-valor">{{ fabricantes_distintos }}</span>
+        <span class="card-resumo-label" title="Quantos fabricantes diferentes aparecem no estoque">Fabricantes distintos</span>
     </div>
 
-    {% for valor in status_valores %}
-    <div class="card-resumo" data-status="{{ status_slug(status_labels[loop.index0]) }}">
+    <div class="card-resumo {{ 'card-resumo-alerta' if sem_serial > 0 else '' }}">
         <div class="card-resumo-icon">
-            {% if loop.index0 == 0 %}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                <rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="3" y1="12" x2="21" y2="12"/>
             </svg>
-            {% elif loop.index0 == 1 %}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-            </svg>
-            {% elif loop.index0 == 2 %}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-            {% elif loop.index0 == 3 %}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-            </svg>
-            {% else %}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            </svg>
-            {% endif %}
         </div>
-        <span class="card-resumo-valor">{{ valor }}</span>
-        <span class="card-resumo-label" title="{{ status_descricao(status_labels[loop.index0]) }}">{{ status_labels[loop.index0] }}</span>
+        <span class="card-resumo-valor">{{ sem_serial }}</span>
+        <span class="card-resumo-label" title="Equipamentos cadastrados sem número de série preenchido">Sem serial cadastrado</span>
     </div>
-    {% endfor %}
+
+    <div class="card-resumo {{ 'card-resumo-alerta' if pendentes_arturito > 0 else '' }}">
+        <div class="card-resumo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+        <span class="card-resumo-valor">{{ pendentes_arturito }}</span>
+        <span class="card-resumo-label" title="Equipamentos com status 'Pendente de verificação' no Arturito">Pendentes no Arturito</span>
+    </div>
 
 </div>
 </div>
@@ -97,12 +85,36 @@
         <div class="card-grafico-header">
             <div class="card-grafico-header-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 7.07 17.07"/>
+                    <path d="M3 21V8l9-6 9 6v13"/><path d="M9 21v-8h6v8"/>
                 </svg>
             </div>
-            <h2>Unidades por status</h2>
+            <h2>Unidades por fabricante</h2>
         </div>
-        <div class="grafico-canvas-wrap"><canvas id="graficoStatus"></canvas></div>
+        <div class="grafico-canvas-wrap"><canvas id="graficoFabricante"></canvas></div>
+    </div>
+
+    <div class="card-grafico">
+        <div class="card-grafico-header">
+            <div class="card-grafico-header-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+            </div>
+            <h2>Unidades por localização</h2>
+        </div>
+        <div class="grafico-canvas-wrap"><canvas id="graficoLocalizacao"></canvas></div>
+    </div>
+
+    <div class="card-grafico">
+        <div class="card-grafico-header">
+            <div class="card-grafico-header-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <h2>Status no Arturito</h2>
+        </div>
+        <div class="grafico-canvas-wrap"><canvas id="graficoArturito"></canvas></div>
     </div>
 
     <div class="card-grafico card-grafico-largo">
@@ -120,9 +132,11 @@
 
 <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
 <script>
-const dadosCategoria = { labels: {{ categorias_labels|tojson }}, valores: {{ categorias_valores|tojson }} };
-const dadosStatus    = { labels: {{ status_labels|tojson }},    valores: {{ status_valores|tojson }}    };
-const dadosEvolucao  = { labels: {{ evolucao_labels|tojson }},  valores: {{ evolucao_valores|tojson }}  };
+const dadosCategoria   = { labels: {{ categorias_labels|tojson }},   valores: {{ categorias_valores|tojson }}   };
+const dadosFabricante  = { labels: {{ fabricantes_labels|tojson }},  valores: {{ fabricantes_valores|tojson }}  };
+const dadosLocalizacao = { labels: {{ localizacao_labels|tojson }},  valores: {{ localizacao_valores|tojson }}  };
+const dadosArturito    = { labels: {{ arturito_labels|tojson }},     valores: {{ arturito_valores|tojson }}     };
+const dadosEvolucao    = { labels: {{ evolucao_labels|tojson }},     valores: {{ evolucao_valores|tojson }}     };
 
 // Mercado Livre palette
 const ML_BLUE   = '#3483FA';
@@ -132,12 +146,12 @@ const ML_ORANGE = '#FF7733';
 const ML_GRAY   = '#AAAAAA';
 const ML_PURPLE = '#6B46C1';
 
-const coresStatus = {
-    'Disponível':     ML_GREEN,
-    'Reservado':      ML_PURPLE,
-    'Em uso':         ML_BLUE,
-    'Em manutenção':  ML_ORANGE,
-    'Baixado':        ML_GRAY,
+const PALETA = [ML_BLUE, ML_GREEN, ML_ORANGE, ML_PURPLE, '#00C4B3', '#E5484D', '#F5A623'];
+
+const coresArturito = {
+    'Atualizado': ML_GREEN,
+    'Pendente de verificação': ML_ORANGE,
+    'Não informado': ML_GRAY,
 };
 
 const gridColor = 'rgba(15,42,92,0.06)';
@@ -146,63 +160,67 @@ const fontFamily = "'IBM Plex Sans', -apple-system, sans-serif";
 Chart.defaults.font.family = fontFamily;
 Chart.defaults.color = '#999999';
 
-new Chart(document.getElementById('graficoCategoria'), {
-    type: 'bar',
-    data: {
-        labels: dadosCategoria.labels,
-        datasets: [{
-            label: 'Quantidade',
-            data: dadosCategoria.valores,
-            backgroundColor: ML_BLUE,
-            hoverBackgroundColor: '#2968C8',
-            borderRadius: 6,
-            borderSkipped: false,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0, font: { weight: '700' } },
-                grid: { color: gridColor }
-            },
-            x: { grid: { display: false } }
+function graficoBarra(id, dados, cor) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: dados.labels,
+            datasets: [{
+                label: 'Quantidade',
+                data: dados.valores,
+                backgroundColor: cor,
+                hoverBackgroundColor: cor,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, font: { weight: '700' } },
+                    grid: { color: gridColor }
+                },
+                x: { grid: { display: false } }
+            }
         }
-    }
-});
+    });
+}
 
-new Chart(document.getElementById('graficoStatus'), {
-    type: 'doughnut',
-    data: {
-        labels: dadosStatus.labels,
-        datasets: [{
-            data: dadosStatus.valores,
-            backgroundColor: dadosStatus.labels.map(l => coresStatus[l] || ML_GRAY),
-            borderWidth: 3,
-            borderColor: '#FFFFFF',
-            hoverOffset: 6,
-        }]
-    },
-    options: {
-        cutout: '62%',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 16,
-                    usePointStyle: true,
-                    pointStyleWidth: 10,
-                    font: { weight: '700', size: 13 }
+function graficoRosca(id, dados, cores) {
+    new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: {
+            labels: dados.labels,
+            datasets: [{
+                data: dados.valores,
+                backgroundColor: cores,
+                borderWidth: 3,
+                borderColor: '#FFFFFF',
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            cutout: '62%',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10, font: { weight: '700', size: 13 } }
                 }
             }
         }
-    }
-});
+    });
+}
+
+graficoBarra('graficoCategoria', dadosCategoria, ML_BLUE);
+graficoBarra('graficoFabricante', dadosFabricante, ML_PURPLE);
+graficoRosca('graficoLocalizacao', dadosLocalizacao, dadosLocalizacao.labels.map((_, i) => PALETA[i % PALETA.length]));
+graficoRosca('graficoArturito', dadosArturito, dadosArturito.labels.map(l => coresArturito[l] || ML_GRAY));
 
 new Chart(document.getElementById('graficoEvolucao'), {
     type: 'line',
