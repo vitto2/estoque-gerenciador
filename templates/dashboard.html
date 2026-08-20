@@ -256,3 +256,7 @@ new Chart(document.getElementById('graficoEvolucao'), {
 </script>
 {% endif %}
 {% endblock %}
+
+{% block scripts_extra %}
+<script src="{{ url_for('static', filename='js/dashboard-motion.js') }}"></script>
+{% endblock %}
