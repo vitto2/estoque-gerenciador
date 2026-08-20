@@ -672,6 +672,11 @@ a:hover { text-decoration: underline; }
 
 .filtro-campo { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
 
+/* Filtros em drawer — só existe como botão/sheet no mobile (ver media query) */
+.btn-abrir-filtros { display: none; }
+.filtros-backdrop { display: none; }
+.filtros-drawer-header { display: none; }
+
 .filtro-campo label {
     font-size: 11px;
     color: var(--text-secondary);
@@ -1260,11 +1265,15 @@ textarea:focus {
     color: var(--text-secondary);
 }
 
+.lote-secoes { display: flex; flex-direction: column; gap: 20px; padding: 22px 24px 4px; }
+
+.lote-secao { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+.lote-secao:first-child { padding-top: 0; border-top: none; }
+
 .lote-campos-comuns {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
-    padding: 24px;
 }
 
 .lote-campos-comuns .campo-largo { grid-column: 1 / -1; }
@@ -1348,6 +1357,11 @@ textarea:focus {
     outline: none;
     border-color: var(--ml-blue);
     box-shadow: 0 0 0 3px rgba(52,131,250,0.15);
+}
+
+.serial-invalido, .serial-invalido:focus {
+    border-color: var(--vermelho);
+    background: var(--vermelho-claro);
 }
 
 .serial-input::placeholder { color: var(--text-light); font-weight: 400; }
@@ -1665,9 +1679,71 @@ button:focus-visible,
     }
     textarea, .saida-textarea { min-height: 140px; }
 
-    /* Filtros: cada campo ocupa a largura toda */
-    .filtros { padding: 16px; gap: 12px; }
+    /* Filtros viram um bottom sheet no mobile, acionado pelo botão "Filtros" */
+    .btn-abrir-filtros {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        position: relative;
+        margin: -8px 0 16px;
+        padding: 9px 16px;
+        border-radius: var(--raio-botao);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font-size: 13.5px;
+        font-weight: 700;
+    }
+    .btn-abrir-filtros-badge {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--amarelo-spark-dark);
+    }
+    .filtros-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(23,24,28,0.5);
+        z-index: 199;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transicao);
+    }
+    .filtros-backdrop.aberta { opacity: 1; pointer-events: auto; }
+
+    .filtros {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        z-index: 200;
+        border-radius: var(--raio-flutuante) var(--raio-flutuante) 0 0;
+        box-shadow: var(--sombra-lg);
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: translateY(100%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 16px; gap: 12px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+    }
+    .filtros.aberta { transform: translateY(0); }
     .filtro-campo { min-width: 100%; }
+
+    .filtros-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        font-family: var(--fonte-display);
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    .filtros-drawer-header button {
+        background: var(--neutral-bg);
+        border: none;
+        border-radius: 50%;
+        width: 28px; height: 28px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-secondary);
+    }
 
     .form-card { padding: 20px 16px; }
     .form-acoes-fixa-mobile {

@@ -12,7 +12,21 @@
     </span>
 </div>
 
-<form method="get" class="filtros">
+{% set tem_filtro_ativo = filtro_categoria or filtro_status or filtro_tecnico %}
+<button type="button" class="btn-abrir-filtros" id="btn-abrir-filtros">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+    Filtros
+    {% if tem_filtro_ativo %}<span class="btn-abrir-filtros-badge"></span>{% endif %}
+</button>
+
+<div class="filtros-backdrop" id="filtros-backdrop"></div>
+<form method="get" class="filtros" id="filtros-form">
+    <div class="filtros-drawer-header">
+        <span>Filtros</span>
+        <button type="button" id="btn-fechar-filtros" aria-label="Fechar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
     <div class="filtro-campo">
         <label for="categoria">Categoria</label>
         <select name="categoria" id="categoria">
@@ -201,5 +215,27 @@ function alternarDetalhesEquipamento(botao) {
     const linha = botao.closest('tr');
     linha.classList.toggle('expandido');
 }
+
+(function () {
+    const form = document.getElementById('filtros-form');
+    const backdrop = document.getElementById('filtros-backdrop');
+    const btnAbrir = document.getElementById('btn-abrir-filtros');
+    const btnFechar = document.getElementById('btn-fechar-filtros');
+    if (!form || !btnAbrir) return;
+
+    function abrir() {
+        form.classList.add('aberta');
+        backdrop.classList.add('aberta');
+        document.body.style.overflow = 'hidden';
+    }
+    function fechar() {
+        form.classList.remove('aberta');
+        backdrop.classList.remove('aberta');
+        document.body.style.overflow = '';
+    }
+    btnAbrir.addEventListener('click', abrir);
+    btnFechar.addEventListener('click', fechar);
+    backdrop.addEventListener('click', fechar);
+})();
 </script>
 {% endblock %}

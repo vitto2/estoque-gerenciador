@@ -188,9 +188,10 @@ def _aplicar_filtros(query, filtros):
     return query
 
 
-def _contexto_lote(form_data=None, seriais=None):
+def _contexto_lote(form_data=None, seriais=None, serial_problemas=None):
     fd = form_data or {}
     return {
+        "serial_problemas": serial_problemas or [],
         "valores": {
             "fabricante": fd.get("fabricante", ""),
             "modelo": fd.get("modelo", ""),
@@ -275,14 +276,19 @@ def lote():
         if not seriais:
             erros.append("Adicione pelo menos um número de série.")
 
-        vistos, duplicados_no_lote = set(), set()
+        # Linhas problemáticas (chave em minúsculo) — usado só para destacar
+        # visualmente a linha certa na tabela, não muda a regra de validação.
+        linhas_com_erro = set()
+
+        contagem = {}
         for s in seriais:
             chave = s.lower()
-            if chave in vistos:
-                duplicados_no_lote.add(s)
-            vistos.add(chave)
+            contagem[chave] = contagem.get(chave, 0) + 1
+        duplicados_no_lote = {chave for chave, n in contagem.items() if n > 1}
         if duplicados_no_lote:
-            erros.append(f"Seriais repetidos nesta lista: {', '.join(sorted(duplicados_no_lote))}.")
+            linhas_com_erro |= duplicados_no_lote
+            nomes = sorted({s for s in seriais if s.lower() in duplicados_no_lote})
+            erros.append(f"Seriais repetidos nesta lista: {', '.join(nomes)}.")
 
         if seriais and not duplicados_no_lote:
             ja_cadastrados = (
@@ -291,13 +297,17 @@ def lote():
                 .all()
             )
             if ja_cadastrados:
+                chaves_existentes = {e.serial.lower() for e in ja_cadastrados}
+                linhas_com_erro |= chaves_existentes
                 nomes = sorted({e.serial for e in ja_cadastrados})
                 erros.append(f"Seriais já cadastrados no estoque: {', '.join(nomes)}.")
 
         if erros:
             for e in erros:
                 flash(e, "erro")
-            return render_template("lote.html", **_contexto_lote(form_data=request.form, seriais=seriais_raw))
+            return render_template("lote.html", **_contexto_lote(
+                form_data=request.form, seriais=seriais_raw, serial_problemas=list(linhas_com_erro),
+            ))
 
         for serial in seriais:
             db.session.add(Equipamento(

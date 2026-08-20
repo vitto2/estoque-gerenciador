@@ -27,86 +27,106 @@
             <span>O que é igual para todos os equipamentos deste lote</span>
         </div>
 
-        <div class="lote-campos-comuns">
-            <div class="campo">
-                <label for="fabricante">Fabricante <span class="campo-obrigatorio">*</span></label>
-                <input type="text" id="fabricante" name="fabricante" required
-                       value="{{ valores.fabricante }}"
-                       placeholder="Ex.: Dell">
+        <div class="lote-secoes">
+            <div class="lote-secao">
+                <h3 class="form-secao-titulo">Identificação</h3>
+                <div class="lote-campos-comuns">
+                    <div class="campo">
+                        <label for="fabricante">Fabricante <span class="campo-obrigatorio">*</span></label>
+                        <input type="text" id="fabricante" name="fabricante" required
+                               value="{{ valores.fabricante }}"
+                               placeholder="Ex.: Dell">
+                    </div>
+
+                    <div class="campo">
+                        <label for="modelo">Modelo <span class="campo-obrigatorio">*</span></label>
+                        <input type="text" id="modelo" name="modelo" required
+                               value="{{ valores.modelo }}"
+                               placeholder="Ex.: Latitude 5420">
+                    </div>
+
+                    <div class="campo">
+                        <label for="categoria">Categoria <span class="campo-obrigatorio">*</span></label>
+                        <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
+                            <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
+                            {% for c in categorias %}
+                                <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" id="categoria_customizada" name="categoria_customizada"
+                               placeholder="Nova categoria"
+                               value="{{ valores.categoria_customizada }}"
+                               style="display:none; margin-top:8px;">
+                    </div>
+                </div>
             </div>
 
-            <div class="campo">
-                <label for="modelo">Modelo <span class="campo-obrigatorio">*</span></label>
-                <input type="text" id="modelo" name="modelo" required
-                       value="{{ valores.modelo }}"
-                       placeholder="Ex.: Latitude 5420">
+            <div class="lote-secao">
+                <h3 class="form-secao-titulo">Rastreabilidade</h3>
+                <div class="lote-campos-comuns">
+                    <div class="campo">
+                        <label for="tecnico_responsavel">Técnico responsável <span class="campo-obrigatorio">*</span></label>
+                        <input type="text" id="tecnico_responsavel" name="tecnico_responsavel"
+                               list="lista-tecnicos" required
+                               value="{{ valores.tecnico_responsavel }}"
+                               placeholder="Nome do técnico">
+                        <datalist id="lista-tecnicos">
+                            {% for t in tecnicos_existentes %}
+                                <option value="{{ t }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div class="campo">
+                        <label for="status_arturito">Status no Arturito <span class="campo-opcional">(opcional)</span></label>
+                        <select id="status_arturito" name="status_arturito">
+                            <option value="">Não informado</option>
+                            {% for s in status_arturito_opcoes %}
+                                <option value="{{ s }}" {{ 'selected' if s == valores.status_arturito else '' }}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <div class="campo">
-                <label for="categoria">Categoria <span class="campo-obrigatorio">*</span></label>
-                <select id="categoria" name="categoria" required onchange="alternarCategoriaCustomizada()">
-                    <option value="" disabled {{ 'selected' if not valores.categoria else '' }}>Selecione...</option>
-                    {% for c in categorias %}
-                        <option value="{{ c }}" {{ 'selected' if c == valores.categoria else '' }}>{{ c }}</option>
-                    {% endfor %}
-                </select>
-                <input type="text" id="categoria_customizada" name="categoria_customizada"
-                       placeholder="Nova categoria"
-                       value="{{ valores.categoria_customizada }}"
-                       style="display:none; margin-top:8px;">
+            <div class="lote-secao">
+                <h3 class="form-secao-titulo">Armazenamento e situação</h3>
+                <div class="lote-campos-comuns">
+                    <div class="campo">
+                        <label for="local_armazenamento">Local de armazenamento</label>
+                        <select id="local_armazenamento" name="local_armazenamento">
+                            <option value="">Não informado</option>
+                            {% for l in locais_armazenamento %}
+                                <option value="{{ l }}" {{ 'selected' if l == valores.local_armazenamento else '' }}>{{ l }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="status">Status <span class="campo-obrigatorio">*</span></label>
+                        <select id="status" name="status" required>
+                            {% for s in status_opcoes %}
+                                <option value="{{ s }}" {{ 'selected' if s == valores.status else '' }}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="campo-hint status-legenda">
+                            {% for s in status_opcoes %}<strong>{{ s }}</strong>: {{ status_descricao(s) }}{{ ' · ' if not loop.last }}{% endfor %}
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div class="campo">
-                <label for="tecnico_responsavel">Técnico responsável <span class="campo-obrigatorio">*</span></label>
-                <input type="text" id="tecnico_responsavel" name="tecnico_responsavel"
-                       list="lista-tecnicos" required
-                       value="{{ valores.tecnico_responsavel }}"
-                       placeholder="Nome do técnico">
-                <datalist id="lista-tecnicos">
-                    {% for t in tecnicos_existentes %}
-                        <option value="{{ t }}">
-                    {% endfor %}
-                </datalist>
-            </div>
-
-            <div class="campo">
-                <label for="status">Status <span class="campo-obrigatorio">*</span></label>
-                <select id="status" name="status" required>
-                    {% for s in status_opcoes %}
-                        <option value="{{ s }}" {{ 'selected' if s == valores.status else '' }}>{{ s }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo">
-                <label for="local_armazenamento">Local de armazenamento</label>
-                <select id="local_armazenamento" name="local_armazenamento">
-                    <option value="">Não informado</option>
-                    {% for l in locais_armazenamento %}
-                        <option value="{{ l }}" {{ 'selected' if l == valores.local_armazenamento else '' }}>{{ l }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo">
-                <label for="status_arturito">Status no Arturito <span class="campo-opcional">(opcional)</span></label>
-                <select id="status_arturito" name="status_arturito">
-                    <option value="">Não informado</option>
-                    {% for s in status_arturito_opcoes %}
-                        <option value="{{ s }}" {{ 'selected' if s == valores.status_arturito else '' }}>{{ s }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="campo campo-largo">
-                <label for="observacoes">Observações <span class="campo-opcional">(opcional)</span></label>
-                <textarea id="observacoes" name="observacoes" rows="2"
-                          placeholder="Ex.: número do ticket do Jira, detalhes do lote, etc.">{{ valores.observacoes }}</textarea>
+            <div class="lote-secao">
+                <h3 class="form-secao-titulo">Informações complementares</h3>
+                <div class="campo">
+                    <label for="observacoes">Observações <span class="campo-opcional">(opcional)</span></label>
+                    <textarea id="observacoes" name="observacoes" rows="2"
+                              placeholder="Ex.: número do ticket do Jira, detalhes do lote, etc.">{{ valores.observacoes }}</textarea>
+                </div>
             </div>
         </div>
         <div class="lote-campos-comuns-legenda">
-            Campos com <span class="campo-obrigatorio">*</span> são obrigatórios ·
-            {% for s in status_opcoes %}<strong>{{ s }}</strong>: {{ status_descricao(s) }}{{ ' · ' if not loop.last }}{% endfor %}
+            Campos com <span class="campo-obrigatorio">*</span> são obrigatórios
         </div>
     </div>
 
@@ -130,7 +150,7 @@
                         <th class="col-acao"></th>
                     </tr>
                 </thead>
-                <tbody id="seriais-tbody">
+                <tbody id="seriais-tbody" data-problemas='{{ serial_problemas | tojson }}'>
                     {% for s in seriais %}
                     <tr class="serial-row">
                         <td><span class="serial-seq">{{ loop.index }}</span></td>
@@ -253,5 +273,21 @@ function alternarCategoriaCustomizada() {
     }
 }
 document.addEventListener('DOMContentLoaded', alternarCategoriaCustomizada);
+
+// Destaca na hora as linhas cujo serial deu erro no envio anterior
+// (repetido na lista ou já cadastrado no estoque).
+function destacarLinhasComProblema() {
+    const tbody = document.getElementById('seriais-tbody');
+    let problemas = [];
+    try { problemas = JSON.parse(tbody.dataset.problemas || '[]'); } catch (e) { problemas = []; }
+    if (!problemas.length) return;
+    document.querySelectorAll('.serial-input').forEach((input) => {
+        if (problemas.includes(input.value.trim().toLowerCase())) {
+            input.classList.add('serial-invalido');
+            input.title = 'Repetido nesta lista ou já cadastrado no estoque';
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', destacarLinhasComProblema);
 </script>
 {% endblock %}
