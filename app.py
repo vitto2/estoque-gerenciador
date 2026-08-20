@@ -1,4 +1,5 @@
 import os
+import sys
 
 from flask import Flask, render_template
 from flask_wtf import CSRFProtect
@@ -31,6 +32,22 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        # Autocorreção: seriais numéricos que entraram com ".0" no final
+        # (cópia/cola de planilha, ver models.normalizar_serial) antes
+        # dessa validação existir. Idempotente e não altera nada em caso
+        # de colisão, então é seguro rodar a cada início da aplicação —
+        # sem isso, dados antigos em produção nunca seriam corrigidos,
+        # já que não há acesso direto ao banco fora do próprio app.
+        try:
+            resultado = normalizar_seriais_existentes()
+            if resultado["corrigidos"] or resultado["colisoes"]:
+                print(
+                    f"[normalizar_seriais] {len(resultado['corrigidos'])} corrigido(s), "
+                    f"{len(resultado['colisoes'])} colisão(ões) pendente(s) de revisão manual.",
+                    file=sys.stderr,
+                )
+        except Exception as erro:
+            print(f"[normalizar_seriais] Falha ao normalizar seriais existentes: {erro!r}", file=sys.stderr)
 
     from routes.dashboard import dashboard_bp
     from routes.equipamentos import equipamentos_bp
